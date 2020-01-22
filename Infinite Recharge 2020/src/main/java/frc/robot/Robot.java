@@ -14,19 +14,19 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 public class Robot extends TimedRobot {
-  private DifferentialDrive m_myRobot;
-  private XboxController m_controller;
+  private DifferentialDrive _robot;
+  private XboxController driver1;
 
   @Override
   public void robotInit() {
-    m_myRobot = new DifferentialDrive(new PWMVictorSPX(0), new PWMVictorSPX(1));
-    m_controller = new XboxController(0);
+    _robot = new DifferentialDrive(new PWMVictorSPX(0), new PWMVictorSPX(1));
+    driver1 = new XboxController(0);
   }
 
   @Override
   public void teleopPeriodic() {
-    double left = m_controller.getY(GenericHID.Hand.kLeft);
-    double right = m_controller.getY(GenericHID.Hand.kRight);
-    m_myRobot.tankDrive(left, right);
+    double left = driver1.getY(GenericHID.Hand.kLeft);
+    double right = driver1.getY(GenericHID.Hand.kRight);
+    _robot.tankDrive(left, right);
   }
 } 
