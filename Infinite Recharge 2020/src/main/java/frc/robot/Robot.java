@@ -18,6 +18,7 @@ public class Robot extends TimedRobot {
   private VictorSPX slaveLeft;
   private VictorSPX masterRight;
   private VictorSPX slaveRight;
+  //TODO: refactor the talons for what they are used for
   private TalonSRX talon1;
   private TalonSRX talon2;
   private TalonSRX talon3;
