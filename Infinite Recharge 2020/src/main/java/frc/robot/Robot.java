@@ -1,48 +1,65 @@
 package frc.robot;
 
+//WPILIB imports
+
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID;
-import edu.wpi.first.wpilibj.PWMVictorSPX;
+import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
+//CTRE imports
+
 import com.ctre.phoenix.motorcontrol.can.*;
 
 public class Robot extends TimedRobot {
+
+  //robot
   private DifferentialDrive _robot;
-  private XboxController driver1;
 
   //motor controllers
-  private VictorSPX masterLeft;
-  private VictorSPX slaveLeft;
-  private VictorSPX masterRight;
-  private VictorSPX slaveRight;
-  //TODO: refactor the talons for what they are used for
-  private TalonSRX talon1;
-  private TalonSRX talon2;
-  private TalonSRX talon3;
-  private TalonSRX talon4;
+  private WPI_VictorSPX masterLeft;
+  private WPI_VictorSPX slaveLeft;
+  private WPI_VictorSPX masterRight;
+  private WPI_VictorSPX slaveRight;
+
+  //speed controller groups
+  private SpeedControllerGroup mGroupLeft;
+  private SpeedControllerGroup mGroupRight;
+
+  //other moders TODO: refactor the talons for what they are used for
+  private WPI_TalonSRX talon1;
+  private WPI_TalonSRX talon2;
+  private WPI_TalonSRX talon3;
+  private WPI_TalonSRX talon4;
+
+  //controllers
+  private XboxController driver1;
+  private XboxController driver2;
 
   @Override
   public void robotInit() {
 
-    //TODO: ask shane what ports things go in
+    //TODO: find out what ports these motors are in
     //left motor controllers for drive
-    masterLeft = new VictorSPX(0);
-    slaveLeft = new VictorSPX(1);
+    masterLeft = new WPI_VictorSPX(0);
+    slaveLeft = new WPI_VictorSPX(1);
     //right motor controllers for drive
-    masterRight = new VictorSPX(2);
-    slaveRight = new VictorSPX(3);
+    masterRight = new WPI_VictorSPX(2);
+    slaveRight = new WPI_VictorSPX(3);
+    //speed controllers
+    mGroupLeft = new SpeedControllerGroup(masterLeft, slaveLeft);
+    mGroupRight = new SpeedControllerGroup(masterRight, slaveRight);
     //talons
-    talon1 = new TalonSRX(4);
-    talon2 = new TalonSRX(5);
-    talon3 = new TalonSRX(6);
-    talon4 = new TalonSRX(7);
+    talon1 = new WPI_TalonSRX(4);
+    talon2 = new WPI_TalonSRX(5);
+    talon3 = new WPI_TalonSRX(6);
+    talon4 = new WPI_TalonSRX(7);
     //robot
-    _robot = new DifferentialDrive(new PWMVictorSPX(0), new PWMVictorSPX(1)); //TODO: change this to support our Victor SPX
+    _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     //controllers
     driver1 = new XboxController(0);
+    driver2 = new XboxController(1);
   }
 
   @Override
