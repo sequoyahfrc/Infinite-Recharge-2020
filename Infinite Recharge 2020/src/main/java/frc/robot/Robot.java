@@ -28,7 +28,7 @@ public class Robot extends TimedRobot {
   private SpeedControllerGroup mGroupRight;
 
   //other moders TODO: refactor the talons for what they are used for
-  private WPI_TalonSRX talon1;
+  private WPI_TalonSRX intakeMotor;
   private WPI_TalonSRX talon2;
   private WPI_TalonSRX talon3;
   private WPI_TalonSRX talon4;
@@ -40,7 +40,7 @@ public class Robot extends TimedRobot {
   @Override
   public void robotInit() {
 
-    //TODO: find out what ports these motors are in
+    //rear motors are slaves front motors are masters
     //left motor controllers for drive
     masterLeft = new WPI_VictorSPX(0);
     slaveLeft = new WPI_VictorSPX(1);
@@ -51,7 +51,7 @@ public class Robot extends TimedRobot {
     mGroupLeft = new SpeedControllerGroup(masterLeft, slaveLeft);
     mGroupRight = new SpeedControllerGroup(masterRight, slaveRight);
     //talons
-    talon1 = new WPI_TalonSRX(4);
+    intakeMotor = new WPI_TalonSRX(4);
     talon2 = new WPI_TalonSRX(5);
     talon3 = new WPI_TalonSRX(6);
     talon4 = new WPI_TalonSRX(7);
@@ -67,5 +67,10 @@ public class Robot extends TimedRobot {
     double left = driver1.getY(GenericHID.Hand.kLeft);
     double right = driver1.getY(GenericHID.Hand.kRight);
     _robot.tankDrive(left, right);
+    if (driver1.getAButton()) {
+      intakeMotor.set(0.5);
+    } else {
+      intakeMotor.stopMotor();
+    }
   }
 } 
