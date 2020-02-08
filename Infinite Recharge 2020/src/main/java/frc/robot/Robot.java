@@ -60,6 +60,9 @@ public class Robot extends TimedRobot {
     //controllers
     driver1 = new XboxController(0);
     driver2 = new XboxController(1);
+    //invert slave motors
+    slaveLeft.setInverted(true);
+    slaveRight.setInverted(true);
   }
 
   @Override
