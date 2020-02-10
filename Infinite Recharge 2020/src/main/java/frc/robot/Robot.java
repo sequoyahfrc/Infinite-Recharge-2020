@@ -4,7 +4,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
@@ -15,6 +15,9 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import com.ctre.phoenix.motorcontrol.can.*;
 
 public class Robot extends TimedRobot {
+
+  //constants
+  private final double INTAKE_AIR_PULSE_TIME = 0.2;
 
   //robot
   private DifferentialDrive _robot;
@@ -31,7 +34,7 @@ public class Robot extends TimedRobot {
 
   //other motors TODO: refactor the talons for what they are used for
   private WPI_TalonSRX intakeMotor;
-  private WPI_TalonSRX talon2;
+  private WPI_TalonSRX conveyorMotor;
   private WPI_TalonSRX talon3;
   private WPI_TalonSRX talon4;
 
@@ -59,7 +62,7 @@ public class Robot extends TimedRobot {
     mGroupRight = new SpeedControllerGroup(masterRight, slaveRight);
     //talons
     intakeMotor = new WPI_TalonSRX(4);
-    talon2 = new WPI_TalonSRX(5);
+    conveyorMotor = new WPI_TalonSRX(5);
     talon3 = new WPI_TalonSRX(6);
     talon4 = new WPI_TalonSRX(7);
     //pnuematics
@@ -76,27 +79,28 @@ public class Robot extends TimedRobot {
     slaveLeft.setInverted(true);
     slaveRight.setInverted(true);
     //set solenoid pulse durations
-    extendIntake.setPulseDuration(0.5);
-    retractIntake.setPulseDuration(0.5);
+    extendIntake.setPulseDuration(INTAKE_AIR_PULSE_TIME);
+    retractIntake.setPulseDuration(INTAKE_AIR_PULSE_TIME);
     //start compressor
     _compressor.start();
   }
 
   @Override
   public void teleopPeriodic() {
-    double left = driver1.getY(GenericHID.Hand.kLeft);
-    double right = driver1.getY(GenericHID.Hand.kRight);
+    double left = driver1.getY(Hand.kLeft);
+    double right = driver1.getY(Hand.kRight);
     _robot.tankDrive(left, right);
-    if (driver1.getAButton()) {
-      intakeMotor.set(0.5);
+    if (driver1.getBumper(Hand.kRight)) {
+      extendIntake.startPulse();
+      intakeMotor.set(0.75);
     } else {
+      retractIntake.startPulse();
       intakeMotor.stopMotor();
     }
-    if (driver1.getXButton()) { //intake extend
-      extendIntake.startPulse();
-    }
-    if (driver1.getYButton()) { //intake retract
-      retractIntake.startPulse();
+    if (driver1.getBButton()) {
+      conveyorMotor.set(0.75);
+    } else {
+      conveyorMotor.stopMotor();
     }
   }
 } 
