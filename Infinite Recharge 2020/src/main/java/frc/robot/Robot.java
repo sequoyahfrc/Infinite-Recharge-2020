@@ -2,8 +2,10 @@ package frc.robot;
 
 //WPILIB imports
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -27,7 +29,7 @@ public class Robot extends TimedRobot {
   private SpeedControllerGroup mGroupLeft;
   private SpeedControllerGroup mGroupRight;
 
-  //other moders TODO: refactor the talons for what they are used for
+  //other motors TODO: refactor the talons for what they are used for
   private WPI_TalonSRX intakeMotor;
   private WPI_TalonSRX talon2;
   private WPI_TalonSRX talon3;
@@ -36,6 +38,11 @@ public class Robot extends TimedRobot {
   //controllers
   private XboxController driver1;
   private XboxController driver2;
+
+  //pnuematics
+  private Compressor _compressor;
+  private Solenoid extendIntake;
+  private Solenoid retractIntake;
 
   @Override
   public void robotInit() {
@@ -55,14 +62,24 @@ public class Robot extends TimedRobot {
     talon2 = new WPI_TalonSRX(5);
     talon3 = new WPI_TalonSRX(6);
     talon4 = new WPI_TalonSRX(7);
+    //pnuematics
+    _compressor = new Compressor(8);
+    extendIntake = new Solenoid(9);
+    retractIntake = new Solenoid(10);
     //robot
     _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     //controllers
     driver1 = new XboxController(0);
     driver2 = new XboxController(1);
+
     //invert slave motors
     slaveLeft.setInverted(true);
     slaveRight.setInverted(true);
+    //set solenoid pulse durations
+    extendIntake.setPulseDuration(0.5);
+    retractIntake.setPulseDuration(0.5);
+    //start compressor
+    _compressor.start();
   }
 
   @Override
@@ -74,6 +91,12 @@ public class Robot extends TimedRobot {
       intakeMotor.set(0.5);
     } else {
       intakeMotor.stopMotor();
+    }
+    if (driver1.getXButton()) { //intake extend
+      extendIntake.startPulse();
+    }
+    if (driver1.getYButton()) { //intake retract
+      retractIntake.startPulse();
     }
   }
 } 
