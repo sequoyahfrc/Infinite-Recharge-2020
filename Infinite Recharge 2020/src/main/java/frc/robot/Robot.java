@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.Timer;
 
 //CTRE imports
 
@@ -17,7 +18,7 @@ import com.ctre.phoenix.motorcontrol.can.*;
 public class Robot extends TimedRobot {
 
   //constants
-  private final double INTAKE_AIR_PULSE_TIME = 0.2;
+  private final double INTAKE_AIR_PULSE_TIME = 0.3;
 
   //robot
   private DifferentialDrive _robot;
@@ -47,6 +48,10 @@ public class Robot extends TimedRobot {
   private Solenoid extendIntake;
   private Solenoid retractIntake;
 
+  //timers
+  private final Timer extTimer = new Timer();
+  private final Timer retTimer = new Timer();
+
   @Override
   public void robotInit() {
 
@@ -66,9 +71,9 @@ public class Robot extends TimedRobot {
     talon3 = new WPI_TalonSRX(6);
     talon4 = new WPI_TalonSRX(7);
     //pnuematics
-    _compressor = new Compressor(8);
-    extendIntake = new Solenoid(9);
-    retractIntake = new Solenoid(10);
+    _compressor = new Compressor(0);
+    extendIntake = new Solenoid(1);
+    retractIntake = new Solenoid(2);
     //robot
     _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     //controllers
@@ -78,9 +83,10 @@ public class Robot extends TimedRobot {
     //invert slave motors
     slaveLeft.setInverted(true);
     slaveRight.setInverted(true);
-    //set solenoid pulse durations
-    extendIntake.setPulseDuration(INTAKE_AIR_PULSE_TIME);
-    retractIntake.setPulseDuration(INTAKE_AIR_PULSE_TIME);
+  }
+
+  @Override
+  public void teleopInit() {
     //start compressor
     _compressor.start();
   }
@@ -90,13 +96,30 @@ public class Robot extends TimedRobot {
     double left = driver1.getY(Hand.kLeft);
     double right = driver1.getY(Hand.kRight);
     _robot.tankDrive(left, right);
+    //intake
     if (driver1.getBumper(Hand.kRight)) {
-      extendIntake.startPulse();
+      if (driver1.getBumperPressed(Hand.kRight)) { //on first check
+        extTimer.start();
+        extendIntake.set(true);
+      }
       intakeMotor.set(0.75);
-    } else {
-      retractIntake.startPulse();
+    } //stop motor after retract
+    if (extTimer.hasPeriodPassed(INTAKE_AIR_PULSE_TIME)) {
+      extendIntake.set(false);
+      if (driver1.getBumperReleased(Hand.kRight)) {
+        retTimer.start();
+        retractIntake.set(true);
+        extTimer.stop();
+        extTimer.reset();
+      }
+    }
+    if (retTimer.hasPeriodPassed(INTAKE_AIR_PULSE_TIME)) {
+      retTimer.stop();
+      retTimer.reset();
+      retractIntake.set(false);
       intakeMotor.stopMotor();
     }
+    //conveyor
     if (driver1.getBButton()) {
       conveyorMotor.set(0.75);
     } else {
