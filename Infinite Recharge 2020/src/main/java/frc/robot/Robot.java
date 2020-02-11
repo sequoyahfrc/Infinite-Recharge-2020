@@ -43,7 +43,7 @@ public class Robot extends TimedRobot {
   private XboxController driver1;
   private XboxController driver2;
 
-  //pnuematics
+  //pneumatics
   private Compressor _compressor;
   private Solenoid extendIntake;
   private Solenoid retractIntake;
@@ -70,7 +70,7 @@ public class Robot extends TimedRobot {
     conveyorMotor = new WPI_TalonSRX(5);
     talon3 = new WPI_TalonSRX(6); //shooter motor left?
     talon4 = new WPI_TalonSRX(7); //shooter motor right?
-    //pnuematics
+    //pneumatics
     _compressor = new Compressor(8);
     extendIntake = new Solenoid(0);
     retractIntake = new Solenoid(1);
@@ -83,6 +83,12 @@ public class Robot extends TimedRobot {
     //invert slave motors
     slaveLeft.setInverted(true);
     slaveRight.setInverted(true);
+  }
+
+  @Override
+  public void disabledInit() {
+    //stop compressor
+    _compressor.stop();
   }
 
   @Override
