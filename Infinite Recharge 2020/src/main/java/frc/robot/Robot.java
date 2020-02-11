@@ -108,16 +108,19 @@ public class Robot extends TimedRobot {
     //intake
     if (driver1.getBumper(Hand.kRight)) {
       if (canIntake) {
-        if (driver1.getBumperPressed(Hand.kRight)) { //on first check
+        //when bumper not pressed on the last check but is on the current check
+        if (driver1.getBumperPressed(Hand.kRight)) {
           extTimer.start();
           extendIntake.set(true);
         }
         intakeMotor.set(0.75);
-        canIntake = false;
+        canIntake = false; //disable intake
       }
     }
+    //after extTimer reaches INTAKE_AIR_PULSE_TIME
     if (extTimer.hasPeriodPassed(INTAKE_AIR_PULSE_TIME)) {
       extendIntake.set(false);
+      //when bumper released
       if (driver1.getBumperReleased(Hand.kRight)) {
         retTimer.start();
         retractIntake.set(true);
@@ -125,15 +128,16 @@ public class Robot extends TimedRobot {
         extTimer.reset();
       }
     }
+    //after retTimer reaches INTAKE_AIR_PULSE_TIME
     if (retTimer.hasPeriodPassed(INTAKE_AIR_PULSE_TIME)) {
       retTimer.stop();
       retTimer.reset();
       retractIntake.set(false);
       intakeMotor.stopMotor();
-      canIntake = true;
+      canIntake = true; //you can use intake again
     }
     //conveyor
-    if (driver1.getBButton()) {
+    if (driver1.getBButton()) { //should i move this to driver 2
       conveyorMotor.set(0.75);
     } else {
       conveyorMotor.stopMotor();
