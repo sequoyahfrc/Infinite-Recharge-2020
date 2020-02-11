@@ -71,9 +71,9 @@ public class Robot extends TimedRobot {
     talon3 = new WPI_TalonSRX(6);
     talon4 = new WPI_TalonSRX(7);
     //pnuematics
-    _compressor = new Compressor(0);
-    extendIntake = new Solenoid(1);
-    retractIntake = new Solenoid(2);
+    _compressor = new Compressor(8);
+    extendIntake = new Solenoid(0);
+    retractIntake = new Solenoid(1);
     //robot
     _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     //controllers
