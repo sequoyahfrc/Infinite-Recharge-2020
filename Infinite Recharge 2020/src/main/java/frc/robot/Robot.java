@@ -68,8 +68,8 @@ public class Robot extends TimedRobot {
     //talons
     intakeMotor = new WPI_TalonSRX(4);
     conveyorMotor = new WPI_TalonSRX(5);
-    talon3 = new WPI_TalonSRX(6);
-    talon4 = new WPI_TalonSRX(7);
+    talon3 = new WPI_TalonSRX(6); //shooter motor left?
+    talon4 = new WPI_TalonSRX(7); //shooter motor right?
     //pnuematics
     _compressor = new Compressor(8);
     extendIntake = new Solenoid(0);
@@ -124,6 +124,10 @@ public class Robot extends TimedRobot {
       conveyorMotor.set(0.75);
     } else {
       conveyorMotor.stopMotor();
+    }
+    //shooter
+    if (driver1.getTriggerAxis(Hand.kRight) == 1) {
+      //SHOOT!
     }
   }
 } 
