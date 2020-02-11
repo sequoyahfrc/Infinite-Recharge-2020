@@ -52,6 +52,9 @@ public class Robot extends TimedRobot {
   private final Timer extTimer = new Timer();
   private final Timer retTimer = new Timer();
 
+  //prevent breaking intake code
+  private boolean canIntake = true;
+
   @Override
   public void robotInit() {
 
@@ -104,12 +107,15 @@ public class Robot extends TimedRobot {
     _robot.tankDrive(left, right);
     //intake
     if (driver1.getBumper(Hand.kRight)) {
-      if (driver1.getBumperPressed(Hand.kRight)) { //on first check
-        extTimer.start();
-        extendIntake.set(true);
+      if (canIntake) {
+        if (driver1.getBumperPressed(Hand.kRight)) { //on first check
+          extTimer.start();
+          extendIntake.set(true);
+        }
+        intakeMotor.set(0.75);
+        canIntake = false;
       }
-      intakeMotor.set(0.75);
-    } //stop motor after retract
+    }
     if (extTimer.hasPeriodPassed(INTAKE_AIR_PULSE_TIME)) {
       extendIntake.set(false);
       if (driver1.getBumperReleased(Hand.kRight)) {
@@ -124,6 +130,7 @@ public class Robot extends TimedRobot {
       retTimer.reset();
       retractIntake.set(false);
       intakeMotor.stopMotor();
+      canIntake = true;
     }
     //conveyor
     if (driver1.getBButton()) {
