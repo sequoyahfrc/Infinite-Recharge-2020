@@ -19,7 +19,7 @@ public class Robot extends TimedRobot {
 
   //constants
   private final double INTAKE_AIR_PULSE_TIME = 0.3;
-
+  private final double INTAKE_SPEED = 0.75;
   //robot
   private DifferentialDrive _robot;
 
@@ -103,7 +103,7 @@ public class Robot extends TimedRobot {
           extTimer.start();
           extendIntake.set(true);
         }
-        intakeMotor.set(0.75);
+        intakeMotor.set(INTAKE_SPEED);
         canIntake = false; //disable intake
       }
     }
@@ -128,7 +128,7 @@ public class Robot extends TimedRobot {
     }
     //conveyor
     if (driver1.getBButton()) { //should i move this to driver 2
-      conveyorMotor.set(0.75);
+      conveyorMotor.set(INTAKE_SPEED);
     } else {
       conveyorMotor.stopMotor();
     }
@@ -138,8 +138,8 @@ public class Robot extends TimedRobot {
       shooterMotorL.set(triggerR);
       shooterMotorR.set(triggerR);
     } else {
-      shooterMotorR.stopMotor();
       shooterMotorL.stopMotor();
+      shooterMotorR.stopMotor();
     }
   }
 } 
