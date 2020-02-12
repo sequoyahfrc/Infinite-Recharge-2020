@@ -36,8 +36,8 @@ public class Robot extends TimedRobot {
   //other motors TODO: refactor the talons for what they are used for
   private WPI_TalonSRX intakeMotor;
   private WPI_TalonSRX conveyorMotor;
-  private WPI_TalonSRX talon3;
-  private WPI_TalonSRX talon4;
+  private WPI_TalonSRX shooterMotorL;
+  private WPI_TalonSRX shooterMotorR;
 
   //controllers
   private XboxController driver1;
@@ -69,29 +69,19 @@ public class Robot extends TimedRobot {
     mGroupLeft = new SpeedControllerGroup(masterLeft, slaveLeft);
     mGroupRight = new SpeedControllerGroup(masterRight, slaveRight);
     //talons
-    intakeMotor = new WPI_TalonSRX(4);
-    conveyorMotor = new WPI_TalonSRX(5);
-    talon3 = new WPI_TalonSRX(6); //shooter motor left?
-    talon4 = new WPI_TalonSRX(7); //shooter motor right?
+    intakeMotor = new WPI_TalonSRX(0);
+    conveyorMotor = new WPI_TalonSRX(1);
+    shooterMotorL = new WPI_TalonSRX(2); //shooter motor left?
+    shooterMotorR = new WPI_TalonSRX(3); //shooter motor right?
     //pneumatics
-    _compressor = new Compressor(8);
-    extendIntake = new Solenoid(0);
-    retractIntake = new Solenoid(1);
+    _compressor = new Compressor();
+    extendIntake = new Solenoid(60, 0);
+    retractIntake = new Solenoid(60, 1);
     //robot
     _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     //controllers
     driver1 = new XboxController(0);
     driver2 = new XboxController(1);
-
-    //invert slave motors
-    slaveLeft.setInverted(true);
-    slaveRight.setInverted(true);
-  }
-
-  @Override
-  public void disabledInit() {
-    //stop compressor
-    _compressor.stop();
   }
 
   @Override
@@ -99,7 +89,7 @@ public class Robot extends TimedRobot {
     //start compressor
     _compressor.start();
   }
-
+ 
   @Override
   public void teleopPeriodic() {
     double left = driver1.getY(Hand.kLeft);
@@ -143,8 +133,13 @@ public class Robot extends TimedRobot {
       conveyorMotor.stopMotor();
     }
     //shooter
-    if (driver1.getTriggerAxis(Hand.kRight) == 1) {
-      //SHOOT!
+    double triggerR = (driver1.getRawAxis(5) + 1) / 2; //trigger goes from -1 to 1
+    if (triggerR > 0) {
+      shooterMotorL.set(triggerR);
+      shooterMotorR.set(triggerR);
+    } else {
+      shooterMotorR.stopMotor();
+      shooterMotorL.stopMotor();
     }
   }
 } 
