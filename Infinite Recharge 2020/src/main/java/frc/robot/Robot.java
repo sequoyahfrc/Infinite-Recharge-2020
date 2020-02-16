@@ -76,7 +76,7 @@ public class Robot extends TimedRobot {
     shooterMotorR = new WPI_TalonSRX(3); // shooter motor right?
     // pneumatics
     _compressor = new Compressor();
-    intakeSol = new DoubleSolenoid(60,0, 1);
+    intakeSol = new DoubleSolenoid(60, 0, 1);
     // robot
     _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     // controllers
