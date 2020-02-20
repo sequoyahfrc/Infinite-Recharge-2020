@@ -146,10 +146,9 @@ public class Robot extends TimedRobot {
       conveyorMotor.stopMotor();
     }
     // shooter
-    final double triggerR = (driver1.getRawAxis(5) + 1) / 2; // trigger goes from -1 to 1
-    if (triggerR > 0) {
-      shooterMotorL.set(triggerR);
-      shooterMotorR.set(triggerR);
+    if (driver1.getBumper(Hand.kLeft)) {
+      shooterMotorL.set(SHOOTER_SPEED);
+      shooterMotorR.set(SHOOTER_SPEED);
     } else {
       shooterMotorL.stopMotor();
       shooterMotorR.stopMotor();
