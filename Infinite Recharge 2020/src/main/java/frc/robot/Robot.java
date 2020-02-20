@@ -7,7 +7,6 @@ import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
@@ -22,6 +21,8 @@ public class Robot extends TimedRobot {
   //constants
   private final double INTAKE_AIR_PULSE_TIME = 0.3;
   private final double INTAKE_SPEED = 0.75;
+  private final double SHOOTER_SPEED = 1.0;
+
   //robot
   private DifferentialDrive _robot;
 
@@ -35,7 +36,6 @@ public class Robot extends TimedRobot {
   private SpeedControllerGroup mGroupLeft;
   private SpeedControllerGroup mGroupRight;
 
-  //other motors TODO: refactor the talons for what they are used for
   private WPI_TalonSRX intakeMotor;
   private WPI_TalonSRX conveyorMotor;
   private WPI_TalonSRX shooterMotorL;
@@ -53,8 +53,13 @@ public class Robot extends TimedRobot {
   private final Timer extTimer = new Timer();
   private final Timer retTimer = new Timer();
 
+<<<<<<< HEAD
   //prevent breaking intake code
   private final boolean canIntake = true;
+=======
+  //other
+  boolean canIntake = true;
+>>>>>>> 795546970c420df3bc0a7c228775006bd8e4a2ca
 
   @Override
   public void robotInit() {
@@ -82,6 +87,8 @@ public class Robot extends TimedRobot {
     // controllers
     driver1 = new XboxController(0);
     driver2 = new XboxController(1);
+    //invert shooter left because it goes counter clockwise
+    shooterMotorL.setInverted(true);
   }
 
   @Override
@@ -92,6 +99,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopPeriodic() {
+<<<<<<< HEAD
     final double left = driver1.getY(Hand.kLeft);
     final double right = driver1.getY(Hand.kRight);
     _robot.tankDrive(left, right);
@@ -138,11 +146,58 @@ public class Robot extends TimedRobot {
      * = true; //you can use intake again }
      */
     // conveyor
+=======
+    //drive
+    final double left = driver1.getY(Hand.kLeft);
+    final double right = driver1.getY(Hand.kRight);
+    _robot.tankDrive(left, right);
+
+    // intake
+    if (driver1.getBumper(Hand.kRight)) {
+      if (canIntake) {
+        extTimer.start();
+        intakeSol.set(Value.kForward);
+        intakeMotor.set(INTAKE_SPEED);
+        canIntake = false;
+      }
+    }
+
+    //shooter
+    if (driver1.getXButton()) { // should i move this to driver 2
+      shooterMotorR.set(SHOOTER_SPEED);
+      shooterMotorL.set(SHOOTER_SPEED);
+    } else {
+      shooterMotorR.stopMotor();
+      shooterMotorL.stopMotor();
+    }
+
+    //after extTimer reaches INTAKE_AIR_PULSE_TIME
+    if (extTimer.hasPeriodPassed(INTAKE_AIR_PULSE_TIME)) {
+      if (driver1.getBumperReleased(Hand.kRight)) {
+        extTimer.stop();
+        extTimer.reset();
+        retTimer.start();
+        intakeSol.set(Value.kReverse);
+      }
+    }
+
+    //after retTimer reaches INTAKE_AIR_PULSE_TIME
+    if (retTimer.hasPeriodPassed(INTAKE_AIR_PULSE_TIME)) {
+      retTimer.stop();
+      retTimer.reset();
+      canIntake = true;
+      intakeSol.set(Value.kOff);
+      intakeMotor.stopMotor();
+    }
+
+    //conveyor
+>>>>>>> 795546970c420df3bc0a7c228775006bd8e4a2ca
     if (driver1.getBButton()) { // should i move this to driver 2
       conveyorMotor.set(INTAKE_SPEED);
     } else {
       conveyorMotor.stopMotor();
     }
+<<<<<<< HEAD
     // shooter
     final double triggerR = (driver1.getRawAxis(5) + 1) / 2; // trigger goes from -1 to 1
     if (triggerR > 0) {
@@ -152,5 +207,7 @@ public class Robot extends TimedRobot {
       shooterMotorL.stopMotor();
       shooterMotorR.stopMotor();
     }
+=======
+>>>>>>> 795546970c420df3bc0a7c228775006bd8e4a2ca
   }
 } 
