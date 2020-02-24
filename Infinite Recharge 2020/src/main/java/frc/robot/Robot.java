@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import com.ctre.phoenix.motorcontrol.can.*;
 
+@SuppressWarnings("unused") //prevent annoying warnings
 public class Robot extends TimedRobot {
 
   //constants
@@ -49,9 +50,15 @@ public class Robot extends TimedRobot {
   private Compressor _compressor;
   private DoubleSolenoid intakeSol; //Value.kForward is extend Value.kReverse is retract
 
+  //controls
+  private MotorButtonBinding xButton;
+  private MotorButtonBinding yButton;
+  private MotorButtonBinding aButton;
+  private MotorButtonBinding bButton;
+
   @Override
   public void robotInit() {
-
+    //victors are for drive system, talons are for accessories
     // rear motors are slaves front motors are masters
     // left motor controllers for drive
     masterLeft = new WPI_VictorSPX(0);
@@ -69,7 +76,7 @@ public class Robot extends TimedRobot {
     shooterMotorR = new WPI_TalonSRX(7); // shooter motor right
     // pneumatics
     _compressor = new Compressor();
-    intakeSol = new DoubleSolenoid(60,0, 1);
+    intakeSol = new DoubleSolenoid(60, 0, 1);
     // robot
     _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     // controllers
@@ -77,6 +84,10 @@ public class Robot extends TimedRobot {
     driver2 = new XboxController(1);
     //invert shooter left because it goes counter clockwise
     shooterMotorR.setInverted(true);
+    //controls
+    xButton = new MotorButtonBinding(CONVEYOR_SPEED, conveyorMotor);
+    yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
+    aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
   }
 
   //only executes once when teleop starts
@@ -92,22 +103,29 @@ public class Robot extends TimedRobot {
     final double left = driver1.getY(Hand.kLeft);
     final double right = driver1.getY(Hand.kRight);
     _robot.tankDrive(left, right);
+    //controls
+    //You can use my MotorButtonBindings if you want its just to prevent repetitive code :) - Brandon
+    //if you dont want it dont delete it leave it commented in case we want to use it later
+    //.SetMotor(driver1.getXButton()); //conveyor
+    //yButton.SetMotor(driver1.getYButton()); //shooter
+    //aButton.SetMotor(driver1.getAButton()); //intake
+    
     if (driver1.getYButton()) {
       shooterMotorL.set(SHOOTER_SPEED);
       shooterMotorR.set(SHOOTER_SPEED);
     } else {
       shooterMotorL.stopMotor();
-      shooterMotorR.stopMotor();
+      shooterMotorR.stopMotor(); 
     }
     if (driver1.getXButton()) {
       conveyorMotor.set(CONVEYOR_SPEED);
     } else {
-      conveyorMotor.set(0);
+      conveyorMotor.stopMotor();
     }
     if (driver1.getAButton()) {
       intakeMotor.set(INTAKE_SPEED);
     } else {
-      intakeMotor.set(0);
+      intakeMotor.stopMotor();
     }
   }
 }
