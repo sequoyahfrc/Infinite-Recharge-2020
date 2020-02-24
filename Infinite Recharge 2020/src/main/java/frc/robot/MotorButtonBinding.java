@@ -8,13 +8,13 @@ class MotorButtonBinding {
 
     //"..." means you can pass as many values as you want for one argument, its stored as an array
     //                                                                  ↓
-    public MotorButtonBinding(final double speed, final SpeedController... motors) {
+    public MotorButtonBinding(double speed, SpeedController... motors) {
         this.motors = motors;
         this.speed = speed;
     }
 
     //if expression is true, start the motor at a certain speed specified in the constructor
-    public void SetMotors(final boolean expression) {
+    public void SetMotors(boolean expression) {
         for (SpeedController motor : motors) {
             if (expression) {
                 motor.set(speed);
@@ -25,6 +25,6 @@ class MotorButtonBinding {
     }
 
     public void SetSpeed(double speed) {
-        this.speed = speed;
+        this. speed = speed;
     }
 }
