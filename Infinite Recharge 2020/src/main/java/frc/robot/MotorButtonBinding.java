@@ -6,6 +6,8 @@ class MotorButtonBinding {
     private final SpeedController[] motors;
     private double speed;
 
+    //"..." means you can pass as many values as you want for one argument, its stored as an array
+    //                                                                  ↓
     public MotorButtonBinding(final double speed, final SpeedController... motors) {
         this.motors = motors;
         this.speed = speed;

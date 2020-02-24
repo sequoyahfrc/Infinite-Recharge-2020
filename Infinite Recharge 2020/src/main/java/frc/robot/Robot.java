@@ -86,6 +86,9 @@ public class Robot extends TimedRobot {
     shooterMotorR.setInverted(true);
     //controls
     xButton = new MotorButtonBinding(CONVEYOR_SPEED, conveyorMotor);
+    //                    these two motors are passed into the class as an array of 2 motors
+    //                                                   ┌──────────────────┐
+    //                                                   ↓                  ↓
     yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
     aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
   }
