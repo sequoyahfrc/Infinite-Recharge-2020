@@ -109,7 +109,7 @@ public class Robot extends TimedRobot {
     //controls
     //You can use my MotorButtonBindings if you want its just to prevent repetitive code :) - Brandon
     //if you dont want it dont delete it leave it commented in case we want to use it later
-    //.SetMotor(driver1.getXButton()); //conveyor
+    //xButton.SetMotor(driver1.getXButton()); //conveyor
     //yButton.SetMotor(driver1.getYButton()); //shooter
     //aButton.SetMotor(driver1.getAButton()); //intake
     
