@@ -15,25 +15,25 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 import com.ctre.phoenix.motorcontrol.can.*;
 
-@SuppressWarnings("unused") //prevent annoying warnings
+@SuppressWarnings("unused") // prevent annoying warnings
 public class Robot extends TimedRobot {
 
-  //constants
+  // constants
   private final double INTAKE_AIR_PULSE_TIME = 0.3;
   private final double INTAKE_SPEED = 1.0;
   private final double SHOOTER_SPEED = 1.0;
   private final double CONVEYOR_SPEED = 0.8;
 
-  //robot
+  // robot
   private DifferentialDrive _robot;
 
-  //motor controllers
+  // motor controllers
   private WPI_VictorSPX masterLeft;
   private WPI_VictorSPX slaveLeft;
   private WPI_VictorSPX masterRight;
   private WPI_VictorSPX slaveRight;
 
-  //speed controller groups
+  // speed controller groups
   private SpeedControllerGroup mGroupLeft;
   private SpeedControllerGroup mGroupRight;
 
@@ -42,15 +42,15 @@ public class Robot extends TimedRobot {
   private WPI_TalonSRX shooterMotorL;
   private WPI_TalonSRX shooterMotorR;
 
-  //controllers
+  // controllers
   private XboxController driver1;
-  private XboxController driver2; //TODO: use this for something
+  private XboxController driver2; // TODO: use this for something
 
-  //pneumatics
+  // pneumatics
   private Compressor _compressor;
-  private DoubleSolenoid intakeSol; //Value.kForward is extend Value.kReverse is retract
+  private DoubleSolenoid intakeSol; // Value.kForward is extend Value.kReverse is retract
 
-  //controls
+  // controls
   private MotorButtonBinding xButton;
   private MotorButtonBinding yButton;
   private MotorButtonBinding aButton;
@@ -58,7 +58,7 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotInit() {
-    //victors are for drive system, talons are for accessories
+    // victors are for drive system, talons are for accessories
     // rear motors are slaves front motors are masters
     // left motor controllers for drive
     masterLeft = new WPI_VictorSPX(0);
@@ -82,43 +82,45 @@ public class Robot extends TimedRobot {
     // controllers
     driver1 = new XboxController(0);
     driver2 = new XboxController(1);
-    //invert shooter left because it goes counter clockwise
+    // invert shooter left because it goes counter clockwise
     shooterMotorR.setInverted(true);
-    //controls
+    // controls
     xButton = new MotorButtonBinding(CONVEYOR_SPEED, conveyorMotor);
-    //                    these two motors are passed into the class as an array of 2 motors
-    //                                                   ┌──────────────────┐
-    //                                                   ↓                  ↓
+    // these two motors are passed into the class as an array of 2 motors
+    // ┌──────────────────┐
+    // ↓ ↓
     yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
     aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
   }
 
-  //only executes once when teleop starts
+  // only executes once when teleop starts
   @Override
   public void teleopInit() {
     // start compressor
     _compressor.start();
   }
 
-  //loops over itself (every ~.02 seconds) until disabled
+  // loops over itself (every ~.02 seconds) until disabled
   @Override
   public void teleopPeriodic() {
     final double left = driver1.getY(Hand.kLeft);
     final double right = driver1.getY(Hand.kRight);
     _robot.tankDrive(left, right);
-    //controls
-    //You can use my MotorButtonBindings if you want its just to prevent repetitive code :) - Brandon
-    //if you dont want it dont delete it leave it commented in case we want to use it later
-    //xButton.SetMotor(driver1.getXButton()); //conveyor
-    //yButton.SetMotor(driver1.getYButton()); //shooter
-    //aButton.SetMotor(driver1.getAButton()); //intake
-    
+    // controls
+    // You can use my MotorButtonBindings if you want its just to prevent repetitive
+    // code :) - Brandon
+    // if you dont want it dont delete it leave it commented in case we want to use
+    // it later
+    // xButton.SetMotor(driver1.getXButton()); //conveyor
+    // yButton.SetMotor(driver1.getYButton()); //shooter
+    // aButton.SetMotor(driver1.getAButton()); //intake
+
     if (driver1.getYButton()) {
       shooterMotorL.set(SHOOTER_SPEED);
       shooterMotorR.set(SHOOTER_SPEED);
     } else {
       shooterMotorL.stopMotor();
-      shooterMotorR.stopMotor(); 
+      shooterMotorR.stopMotor();
     }
     if (driver1.getXButton()) {
       conveyorMotor.set(CONVEYOR_SPEED);
