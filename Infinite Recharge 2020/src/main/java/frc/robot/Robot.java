@@ -63,11 +63,13 @@ public class Robot extends TimedRobot {
   private MotorButtonBinding bButton;
 
   //timers
-  private Timer goForwardTimer;
+  private Timer goForwardTimer = new Timer();
 
   //vision stuff
   private UsbCamera camera;
   private CameraServer server;
+  private boolean lookingForTarget = false;
+  private int targetDir = 0;
 
   @Override
   public void robotInit() {
@@ -192,6 +194,27 @@ public class Robot extends TimedRobot {
       intakeMotor.set(INTAKE_SPEED);
     } else {
       intakeMotor.stopMotor();
+    }
+
+    //auto aim
+    if (driver1.getPOV() > 0) {
+      switch (driver1.getPOV()) {
+        case 90:
+          // right
+          targetDir = 1;
+          break;
+        case 270:
+          // left
+          targetDir = -1;
+          break;
+        case 180:
+          lookingForTarget = false;
+          targetDir = 0;
+          break;
+      }
+    }
+    if (lookingForTarget) {
+      //if target is in front of robot, stop looking for a target
     }
   }
 }
