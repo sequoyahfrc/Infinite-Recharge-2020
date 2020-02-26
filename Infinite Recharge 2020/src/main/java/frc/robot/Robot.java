@@ -173,7 +173,7 @@ public class Robot extends TimedRobot {
     // yButton.SetMotor(driver1.getYButton()); // shooter
     // aButton.SetMotor(driver1.getAButton()); // intake
 
-    if (driver1.getBButton()) {
+    if (driver1.getAButton()) {
       intakeSol.set(Value.kForward);
     } else {
       intakeSol.set(Value.kReverse);
