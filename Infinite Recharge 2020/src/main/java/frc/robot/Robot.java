@@ -1,24 +1,26 @@
 package frc.robot;
 
-import edu.wpi.first.cameraserver.CameraServer;
-
 //WPILIB imports
 
-import edu.wpi.first.wpilibj.Compressor;
-import edu.wpi.first.wpilibj.DoubleSolenoid;
-import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
-import edu.wpi.first.wpilibj.SpeedControllerGroup;
-import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.cscore.UsbCamera;
-import edu.wpi.cscore.UsbCameraInfo;
+import edu.wpi.cscore.*;
+import edu.wpi.first.cameraserver.CameraServer;
 
 //CTRE imports
 
 import com.ctre.phoenix.motorcontrol.can.*;
+
+//OpenCV/CSCore imports
+
+import org.opencv.core.*;
+import org.opencv.imgproc.Imgproc;
+
+//Other imports
+
+import java.awt.image.BufferedImage;
 
 @SuppressWarnings("unused") // prevent annoying warnings
 public class Robot extends TimedRobot {
@@ -37,15 +39,14 @@ public class Robot extends TimedRobot {
   private WPI_VictorSPX slaveLeft;
   private WPI_VictorSPX masterRight;
   private WPI_VictorSPX slaveRight;
-
-  // speed controller groups
-  private SpeedControllerGroup mGroupLeft;
-  private SpeedControllerGroup mGroupRight;
-
   private WPI_TalonSRX intakeMotor;
   private WPI_TalonSRX conveyorMotor;
   private WPI_TalonSRX shooterMotorL;
   private WPI_TalonSRX shooterMotorR;
+
+  // speed controller groups
+  private SpeedControllerGroup mGroupLeft;
+  private SpeedControllerGroup mGroupRight;
 
   // controllers
   private XboxController driver1;
@@ -66,6 +67,7 @@ public class Robot extends TimedRobot {
 
   //vision stuff
   private UsbCamera camera;
+  private CameraServer server;
 
   @Override
   public void robotInit() {
@@ -100,8 +102,37 @@ public class Robot extends TimedRobot {
     yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
     aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
     //vision
-    camera = CameraServer.getInstance().startAutomaticCapture();
+    //FOV = 61 degrees
+    server = CameraServer.getInstance();
+    camera = server.startAutomaticCapture();
     camera.setBrightness(50);
+  }
+
+  public BufferedImage getCameraImage() {
+    Mat m = new Mat();
+    server.getVideo().grabFrame(m);
+    return matToBufferedImage(m);
+  }
+  
+  public BufferedImage matToBufferedImage(Mat m) {
+    int type = BufferedImage.TYPE_BYTE_GRAY;
+    if (m.channels() > 1) {
+      Mat m2 = new Mat();
+      Imgproc.cvtColor(m, m2, Imgproc.COLOR_BGR2RGB);
+      type = BufferedImage.TYPE_3BYTE_BGR;
+      m = m2;
+    }
+    BufferedImage img = new BufferedImage(m.rows(), m.cols(), type);
+    byte[] b = new byte[m.channels() * m.cols() * m.rows()];
+    m.get(0, 0, b);
+    img.getRaster().setDataElements(0, 0, m.cols(), m.rows(), b);
+    return img;
+  }
+
+  @Override
+  public void disabledInit() {
+    goForwardTimer.stop();
+    goForwardTimer.reset();
   }
 
   @Override
@@ -136,7 +167,7 @@ public class Robot extends TimedRobot {
     final double right = driver2.getY(Hand.kRight);
     _robot.tankDrive(left, right);
     // controls
-        // xButton.SetMotor(driver1.getXButton()); // conveyor
+    // xButton.SetMotor(driver1.getXButton()); // conveyor
     // yButton.SetMotor(driver1.getYButton()); // shooter
     // aButton.SetMotor(driver1.getAButton()); // intake
 
