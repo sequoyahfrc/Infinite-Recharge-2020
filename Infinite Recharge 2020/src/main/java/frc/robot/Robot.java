@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.cameraserver.CameraServer;
+
 //WPILIB imports
 
 import edu.wpi.first.wpilibj.Compressor;
@@ -9,7 +11,10 @@ import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.SpeedControllerGroup;
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.cscore.UsbCamera;
+import edu.wpi.cscore.UsbCameraInfo;
 
 //CTRE imports
 
@@ -44,7 +49,7 @@ public class Robot extends TimedRobot {
 
   // controllers
   private XboxController driver1;
-  private XboxController driver2; // TODO: use this for something
+  private XboxController driver2;
 
   // pneumatics
   private Compressor _compressor;
@@ -55,6 +60,12 @@ public class Robot extends TimedRobot {
   private MotorButtonBinding yButton;
   private MotorButtonBinding aButton;
   private MotorButtonBinding bButton;
+
+  //timers
+  private Timer goForwardTimer;
+
+  //vision stuff
+  private UsbCamera camera;
 
   @Override
   public void robotInit() {
@@ -86,11 +97,29 @@ public class Robot extends TimedRobot {
     shooterMotorR.setInverted(true);
     // controls
     xButton = new MotorButtonBinding(CONVEYOR_SPEED, conveyorMotor);
-    // these two motors are passed into the class as an array of 2 motors
-    // ┌──────────────────┐
-    // ↓ ↓
     yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
     aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
+    //vision
+    camera = CameraServer.getInstance().startAutomaticCapture();
+    camera.setBrightness(50);
+  }
+
+  @Override
+  public void autonomousInit() {
+    if (goForwardTimer.get() != 0) {
+      goForwardTimer.stop();
+      goForwardTimer.reset();
+    }
+    goForwardTimer.start();
+  }
+
+  @Override
+  public void autonomousPeriodic() {
+    if (goForwardTimer.hasPeriodPassed(1)) {
+      _robot.stopMotor();
+    } else {
+      _robot.tankDrive(0.4, 0.4);
+    }
   }
 
   // only executes once when teleop starts
@@ -103,18 +132,19 @@ public class Robot extends TimedRobot {
   // loops over itself (every ~.02 seconds) until disabled
   @Override
   public void teleopPeriodic() {
-    final double left = driver1.getY(Hand.kLeft);
-    final double right = driver1.getY(Hand.kRight);
+    final double left = driver2.getY(Hand.kLeft);
+    final double right = driver2.getY(Hand.kRight);
     _robot.tankDrive(left, right);
     // controls
-    // You can use my MotorButtonBindings if you want its just to prevent repetitive
-    // code :) - Brandon
-    // if you dont want it dont delete it leave it commented in case we want to use
-    // it later
-    // xButton.SetMotor(driver1.getXButton()); //conveyor
-    // yButton.SetMotor(driver1.getYButton()); //shooter
-    // aButton.SetMotor(driver1.getAButton()); //intake
+        // xButton.SetMotor(driver1.getXButton()); // conveyor
+    // yButton.SetMotor(driver1.getYButton()); // shooter
+    // aButton.SetMotor(driver1.getAButton()); // intake
 
+    if (driver1.getBButton()) {
+      intakeSol.set(Value.kForward);
+    } else {
+      intakeSol.set(Value.kReverse);
+    }
     if (driver1.getYButton()) {
       shooterMotorL.set(SHOOTER_SPEED);
       shooterMotorR.set(SHOOTER_SPEED);
