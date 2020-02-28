@@ -8,6 +8,8 @@ import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.cscore.*;
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.vision.VisionPipeline;
+import edu.wpi.first.vision.VisionThread;
 
 //CTRE imports
 
@@ -30,6 +32,8 @@ public class Robot extends TimedRobot {
   private final double INTAKE_SPEED = 1.0;
   private final double SHOOTER_SPEED = 1.0;
   private final double CONVEYOR_SPEED = 0.4;
+  private final int[] CAMERA_RES = new int[] { 640, 480 };
+  private final double AUTOAIM_TURN_SPEED = 0.1;
 
   // robot
   private DifferentialDrive _robot;
@@ -70,6 +74,7 @@ public class Robot extends TimedRobot {
   private CameraServer server;
   private boolean lookingForTarget = false;
   private int targetDir = 0;
+  private GRIPVisionProcessor processor;
 
   @Override
   public void robotInit() {
@@ -111,27 +116,32 @@ public class Robot extends TimedRobot {
     camera.setBrightness(50);
     camera.setExposureManual(40);
     camera.setExposureHoldCurrent();
+    camera.setResolution(CAMERA_RES[0], CAMERA_RES[1]);
+    processor = new GRIPVisionProcessor();
   }
 
-  public BufferedImage getCameraImage() {
+  public Mat getFrame() {
     Mat m = new Mat();
-    server.getVideo().grabFrame(m);
-    return matToBufferedImage(m);
+    //get frame
+    do {/* run grabFrame() at least once*/ } while (server.getVideo().grabFrame(m) == 0);
+    return m;
   }
-  
-  public BufferedImage matToBufferedImage(Mat m) {
-    int type = BufferedImage.TYPE_BYTE_GRAY;
-    if (m.channels() > 1) {
-      Mat m2 = new Mat();
-      Imgproc.cvtColor(m, m2, Imgproc.COLOR_BGR2RGB);
-      type = BufferedImage.TYPE_3BYTE_BGR;
-      m = m2;
+
+  public double getBlobX() {
+    KeyPoint[] blobs = processor.findBlobsOutput().toArray();
+    if (blobs.length > 0) {
+      return blobs[0].pt.x;
+    } else {
+      return -1;
     }
-    BufferedImage img = new BufferedImage(m.rows(), m.cols(), type);
-    byte[] b = new byte[m.channels() * m.cols() * m.rows()];
-    m.get(0, 0, b);
-    img.getRaster().setDataElements(0, 0, m.cols(), m.rows(), b);
-    return img;
+  }
+
+  public boolean isWithinMargin(double v, double target, double range) {
+    return (v >= target - range) && (v <= target + range);
+  }
+
+  public void runGRIPPipeLine() {
+    processor.process(getFrame());
   }
 
   @Override
@@ -168,6 +178,7 @@ public class Robot extends TimedRobot {
   // loops over itself (every ~.02 seconds) until disabled
   @Override
   public void teleopPeriodic() {
+    runGRIPPipeLine();
     final double left = driver2.getY(Hand.kLeft);
     final double right = driver2.getY(Hand.kRight);
     _robot.tankDrive(left, right);
@@ -200,7 +211,7 @@ public class Robot extends TimedRobot {
     }
 
     //auto aim
-    if (driver1.getPOV() > 0) {
+    if (driver1.getPOV() > -1) {
       switch (driver1.getPOV()) {
         case 90:
           // right
@@ -210,6 +221,7 @@ public class Robot extends TimedRobot {
           // left
           targetDir = -1;
           break;
+        case 0:
         case 180:
           lookingForTarget = false;
           targetDir = 0;
@@ -218,6 +230,14 @@ public class Robot extends TimedRobot {
     }
     if (lookingForTarget) {
       //if target is in front of robot, stop looking for a target
+      double bx = getBlobX();
+      if (isWithinMargin(bx, CAMERA_RES[0] / 2, 25)) {
+        _robot.stopMotor();
+        lookingForTarget = false;
+        targetDir = 0;
+      } else {
+        _robot.tankDrive(targetDir * AUTOAIM_TURN_SPEED, -targetDir * AUTOAIM_TURN_SPEED);
+      }
     }
   }
 }

@@ -25,6 +25,7 @@ import org.opencv.objdetect.*;
 *
 * @author GRIP
 */
+@SuppressWarnings({"unused", "deprecation"})
 public class GRIPVisionProcessor implements VisionPipeline {
 
 	//Outputs
