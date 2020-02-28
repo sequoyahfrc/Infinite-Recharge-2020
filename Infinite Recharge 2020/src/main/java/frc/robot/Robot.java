@@ -29,7 +29,7 @@ public class Robot extends TimedRobot {
   private final double INTAKE_AIR_PULSE_TIME = 0.3;
   private final double INTAKE_SPEED = 1.0;
   private final double SHOOTER_SPEED = 1.0;
-  private final double CONVEYOR_SPEED = 0.8;
+  private final double CONVEYOR_SPEED = 0.4;
 
   // robot
   private DifferentialDrive _robot;
@@ -104,10 +104,13 @@ public class Robot extends TimedRobot {
     yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
     aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
     //vision
+    //one side of outer port is 17.32051 in
     //FOV = 61 degrees
     server = CameraServer.getInstance();
     camera = server.startAutomaticCapture();
     camera.setBrightness(50);
+    camera.setExposureManual(40);
+    camera.setExposureHoldCurrent();
   }
 
   public BufferedImage getCameraImage() {
