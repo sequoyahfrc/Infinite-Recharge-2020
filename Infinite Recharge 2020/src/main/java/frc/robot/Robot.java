@@ -76,6 +76,9 @@ public class Robot extends TimedRobot {
   private int targetDir = 0;
   private GRIPVisionProcessor processor;
 
+  //other
+  private boolean wentForward = false;
+
   @Override
   public void robotInit() {
     // victors are for drive system, talons are for accessories
@@ -112,8 +115,13 @@ public class Robot extends TimedRobot {
     server = CameraServer.getInstance();
     camera = server.startAutomaticCapture();
     camera.setBrightness(50);
-    camera.setExposureManual(40);
-    camera.setExposureHoldCurrent();
+    try {
+      camera.setExposureManual(40);
+      camera.setExposureHoldCurrent();
+    }
+    catch (Exception e) {
+      System.out.println("Error setting exposure");
+    }
     camera.setResolution(CAMERA_RES[0], CAMERA_RES[1]);
     processor = new GRIPVisionProcessor();
   }
@@ -154,14 +162,17 @@ public class Robot extends TimedRobot {
       goForwardTimer.stop();
       goForwardTimer.reset();
     }
-    goForwardTimer.start();
+    if (!wentForward) {
+      goForwardTimer.start();
+    }
   }
 
   @Override
   public void autonomousPeriodic() {
     if (goForwardTimer.hasPeriodPassed(1)) {
       _robot.stopMotor();
-    } else {
+      wentForward = true;
+    } else if (!wentForward) {
       _robot.tankDrive(0.4, 0.4);
     }
   }
@@ -178,10 +189,10 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     //GRIP pipeline
     runGRIPPipeLine();
-
+    
     //drive
-    final double left = driver2.getY(Hand.kLeft);
-    final double right = driver2.getY(Hand.kRight);
+    final double left = driver1.getY(Hand.kLeft);
+    final double right = driver1.getY(Hand.kRight);
     _robot.tankDrive(left, right); //made a poll on this
 
     // controls
@@ -229,6 +240,7 @@ public class Robot extends TimedRobot {
     if (lookingForTarget) {
       //if target is in front of robot, stop looking for a target
       double bx = getBlobX();
+      System.out.println("Blob X: " + bx);
       if (isWithinMargin(bx, CAMERA_RES[0] / 2, 25)) {
         _robot.stopMotor();
         lookingForTarget = false;
