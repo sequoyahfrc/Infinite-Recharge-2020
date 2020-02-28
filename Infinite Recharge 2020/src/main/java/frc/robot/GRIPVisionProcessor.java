@@ -9,8 +9,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.HashMap;
 
-import edu.wpi.first.wpilibj.vision.VisionPipeline;
-
 import org.opencv.core.*;
 import org.opencv.core.Core.*;
 import org.opencv.features2d.FeatureDetector;
@@ -25,8 +23,8 @@ import org.opencv.objdetect.*;
 *
 * @author GRIP
 */
-@SuppressWarnings({"unused", "deprecation"})
-public class GRIPVisionProcessor implements VisionPipeline {
+@SuppressWarnings({ "unused", "deprecation" })
+public class GRIPVisionProcessor {
 
 	//Outputs
 	private Mat resizeImageOutput = new Mat();
@@ -49,7 +47,7 @@ public class GRIPVisionProcessor implements VisionPipeline {
 	/**
 	 * This is the primary method that runs the entire pipeline and updates the outputs.
 	 */
-	@Override	public void process(Mat source0) {
+	public void process(Mat source0) {
 		// Step Resize_Image0:
 		Mat resizeImageInput = source0;
 		double resizeImageWidth = 640.0;

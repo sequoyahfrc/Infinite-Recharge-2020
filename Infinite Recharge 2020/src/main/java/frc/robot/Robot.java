@@ -109,8 +109,6 @@ public class Robot extends TimedRobot {
     yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
     aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
     //vision
-    //one side of outer port is 17.32051 in
-    //FOV = 61 degrees
     server = CameraServer.getInstance();
     camera = server.startAutomaticCapture();
     camera.setBrightness(50);
