@@ -178,15 +178,15 @@ public class Robot extends TimedRobot {
   // loops over itself (every ~.02 seconds) until disabled
   @Override
   public void teleopPeriodic() {
+    //GRIP pipeline
     runGRIPPipeLine();
+
+    //drive
     final double left = driver2.getY(Hand.kLeft);
     final double right = driver2.getY(Hand.kRight);
-    _robot.tankDrive(left, right);
-    // controls
-    // xButton.SetMotor(driver1.getXButton()); // conveyor
-    // yButton.SetMotor(driver1.getYButton()); // shooter
-    // aButton.SetMotor(driver1.getAButton()); // intake
+    _robot.tankDrive(left, right); //made a poll on this
 
+    // controls
     if (driver1.getAButton()) {
       intakeSol.set(Value.kForward);
     } else {
