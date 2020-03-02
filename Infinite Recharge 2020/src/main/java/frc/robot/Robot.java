@@ -59,6 +59,7 @@ public class Robot extends TimedRobot {
   // pneumatics
   private Compressor _compressor;
   private DoubleSolenoid intakeSol; // Value.kForward is extend Value.kReverse is retract
+  private DoubleSolenoid stopperSol;
 
   // controls
   private MotorButtonBinding xButton;
@@ -100,6 +101,7 @@ public class Robot extends TimedRobot {
     // pneumatics
     _compressor = new Compressor();
     intakeSol = new DoubleSolenoid(60, 0, 1);
+    stopperSol = new DoubleSolenoid(60, 2, 3);
     // robot
     _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     // controllers
@@ -107,7 +109,7 @@ public class Robot extends TimedRobot {
     driver2 = new XboxController(1);
     // invert shooter left because it goes counter clockwise
     shooterMotorR.setInverted(true);
-    // controls
+    // motor button bindings (not used currently)
     xButton = new MotorButtonBinding(CONVEYOR_SPEED, conveyorMotor);
     yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
     aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
@@ -196,6 +198,11 @@ public class Robot extends TimedRobot {
     _robot.tankDrive(left, right); //made a poll on this
 
     // controls
+    if (driver1.getBButton()) {
+      stopperSol.set(Value.kForward);
+    } else {
+      stopperSol.set(Value.kReverse);
+    }
     if (driver1.getAButton()) {
       intakeSol.set(Value.kForward);
     } else {
