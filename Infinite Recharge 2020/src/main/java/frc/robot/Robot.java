@@ -18,11 +18,10 @@ import com.ctre.phoenix.motorcontrol.can.*;
 //OpenCV/CSCore imports
 
 import org.opencv.core.*;
-import org.opencv.imgproc.Imgproc;
 
 //Other imports
 
-import java.awt.image.BufferedImage;
+
 
 @SuppressWarnings("unused") // prevent annoying warnings
 public class Robot extends TimedRobot {
@@ -76,6 +75,8 @@ public class Robot extends TimedRobot {
   private boolean lookingForTarget = false;
   private int targetDir = 0;
   private GRIPVisionProcessor processor;
+  private CvSource dashboard;
+  private double blobX;
 
   //other
   private boolean wentForward = false;
@@ -100,7 +101,7 @@ public class Robot extends TimedRobot {
     shooterMotorR = new WPI_TalonSRX(7); // shooter motor right
     // pneumatics
     _compressor = new Compressor();
-    intakeSol = new DoubleSolenoid(60, 0, 1);
+    intakeSol = new DoubleSolenoid(60, 1, 0);
     stopperSol = new DoubleSolenoid(60, 2, 3);
     // robot
     _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
@@ -116,22 +117,28 @@ public class Robot extends TimedRobot {
     //vision
     server = CameraServer.getInstance();
     camera = server.startAutomaticCapture();
-    camera.setBrightness(50);
-    try {
-      camera.setExposureManual(40);
-      camera.setExposureHoldCurrent();
+    if (camera != null) {
+      camera.setBrightness(50);
+      try {
+        camera.setExposureManual(40);
+        camera.setExposureHoldCurrent();
+      }
+      catch (Exception e) {
+        System.err.println("Error setting exposure!");
+      }
+      camera.setResolution(CAMERA_RES[0], CAMERA_RES[1]);
+      processor = new GRIPVisionProcessor();
+      dashboard = server.putVideo("GRIP", 640, 480);
+    } else {
+      System.err.println("Could not find camera!");
     }
-    catch (Exception e) {
-      System.out.println("Error setting exposure");
-    }
-    camera.setResolution(CAMERA_RES[0], CAMERA_RES[1]);
-    processor = new GRIPVisionProcessor();
   }
 
   public Mat getFrame() {
     Mat m = new Mat();
+    int tries = 0;
     //get frame
-    do {/* run grabFrame() at least once*/ } while (server.getVideo().grabFrame(m) == 0);
+    do {/* run grabFrame() at least once*/ tries++; } while (server.getVideo().grabFrame(m) == 0 && tries < 3);
     return m;
   }
 
@@ -149,7 +156,10 @@ public class Robot extends TimedRobot {
   }
 
   public void runGRIPPipeLine() {
-    processor.process(getFrame());
+    if (camera != null) {
+      processor.process(getFrame());
+      dashboard.putFrame(processor.mask1Output());
+    }
   }
 
   @Override
@@ -189,13 +199,17 @@ public class Robot extends TimedRobot {
   // loops over itself (every ~.02 seconds) until disabled
   @Override
   public void teleopPeriodic() {
-    //GRIP pipeline
-    runGRIPPipeLine();
-    
     //drive
-    final double left = driver1.getY(Hand.kLeft);
-    final double right = driver1.getY(Hand.kRight);
-    _robot.tankDrive(left, right); //made a poll on this
+    double left = driver2.getY(Hand.kLeft);
+    double right = driver2.getY(Hand.kRight);
+    //square inputs so they arent touchy
+    boolean lneg = left < 0;
+    boolean rneg = right < 0;
+    left *= left * (lneg ? -1 : 1);
+    right *= right * (rneg ? -1 : 1);
+    if (!lookingForTarget) {
+      _robot.tankDrive(left, right, false);
+    }
 
     // controls
     if (driver1.getBButton()) {
@@ -205,8 +219,10 @@ public class Robot extends TimedRobot {
     }
     if (driver1.getAButton()) {
       intakeSol.set(Value.kForward);
+      intakeMotor.set(INTAKE_SPEED);
     } else {
       intakeSol.set(Value.kReverse);
+      intakeMotor.stopMotor();
     }
     if (driver1.getYButton()) {
       shooterMotorL.set(SHOOTER_SPEED);
@@ -220,11 +236,6 @@ public class Robot extends TimedRobot {
     } else {
       conveyorMotor.stopMotor();
     }
-    if (driver1.getAButton()) {
-      intakeMotor.set(INTAKE_SPEED);
-    } else {
-      intakeMotor.stopMotor();
-    }
 
     //auto aim
     if (driver1.getPOV() > -1) {
@@ -232,10 +243,12 @@ public class Robot extends TimedRobot {
         case 90:
           // right
           targetDir = 1;
+          lookingForTarget = true;
           break;
         case 270:
           // left
           targetDir = -1;
+          lookingForTarget = true;
           break;
         case 0:
         case 180:
@@ -246,15 +259,21 @@ public class Robot extends TimedRobot {
     }
     if (lookingForTarget) {
       //if target is in front of robot, stop looking for a target
-      double bx = getBlobX();
-      System.out.println("Blob X: " + bx);
-      if (isWithinMargin(bx, CAMERA_RES[0] / 2, 25)) {
-        _robot.stopMotor();
-        lookingForTarget = false;
-        targetDir = 0;
-      } else {
-        _robot.tankDrive(targetDir * AUTOAIM_TURN_SPEED, -targetDir * AUTOAIM_TURN_SPEED);
+      boolean inCenter = isWithinMargin(blobX, CAMERA_RES[0] / 2, 25);
+      if (blobX > -1) {
+        if (inCenter) {
+          System.out.println("Target is at: " + blobX);
+          _robot.stopMotor();
+          lookingForTarget = false;
+          targetDir = 0;
+        }
       }
+      if (!inCenter) {
+        _robot.arcadeDrive(0, targetDir * AUTOAIM_TURN_SPEED, false);
+      }
+      blobX = getBlobX();
+      System.out.println("Blob at: " + blobX);
+      runGRIPPipeLine();
     }
   }
 }
