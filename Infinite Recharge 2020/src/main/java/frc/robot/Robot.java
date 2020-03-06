@@ -1,5 +1,11 @@
 package frc.robot;
 
+
+
+//--------------------IMPORTS--------------------
+
+
+
 //WPILIB imports
 
 import edu.wpi.first.wpilibj.*;
@@ -21,18 +27,23 @@ import org.opencv.core.*;
 
 //Other imports
 
-
-
 @SuppressWarnings("unused") // prevent annoying warnings
 public class Robot extends TimedRobot {
 
-  // constants
+
+
+  //--------------------CONSTANTS--------------------
+
+
+
   private final double INTAKE_AIR_PULSE_TIME = 0.3;
-  private final double INTAKE_SPEED = 1.0;
+  private final double INTAKE_SPEED = 0.75;
   private final double SHOOTER_SPEED = 1.0;
-  private final double CONVEYOR_SPEED = 0.4;
+  private final double CONVEYOR_SPEED = -0.4;
+  private final double CONVEYFRONT_SPEED = 0.75;
   private final int[] CAMERA_RES = new int[] { 640, 480 };
   private final double AUTOAIM_TURN_SPEED = 0.1;
+  private final double THROTTLE_MULTIPLIER = 0.75;
 
   // robot
   private DifferentialDrive _robot;
@@ -46,6 +57,7 @@ public class Robot extends TimedRobot {
   private WPI_TalonSRX conveyorMotor;
   private WPI_TalonSRX shooterMotorL;
   private WPI_TalonSRX shooterMotorR;
+  private WPI_VictorSPX conveyorFront;
 
   // speed controller groups
   private SpeedControllerGroup mGroupLeft;
@@ -99,22 +111,25 @@ public class Robot extends TimedRobot {
     conveyorMotor = new WPI_TalonSRX(5);
     shooterMotorL = new WPI_TalonSRX(6); // shooter motor left
     shooterMotorR = new WPI_TalonSRX(7); // shooter motor right
+    conveyorFront = new WPI_VictorSPX(8);
     // pneumatics
     _compressor = new Compressor();
-    intakeSol = new DoubleSolenoid(60, 1, 0);
+    intakeSol = new DoubleSolenoid(60, 0, 1);
     stopperSol = new DoubleSolenoid(60, 2, 3);
     // robot
     _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     // controllers
     driver1 = new XboxController(0);
     driver2 = new XboxController(1);
-    // invert shooter left because it goes counter clockwise
+    // invert shooter left because it goe s counter clockwise
     shooterMotorR.setInverted(true);
     // motor button bindings (not used currently)
     xButton = new MotorButtonBinding(CONVEYOR_SPEED, conveyorMotor);
     yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
     aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
+
     //vision
+
     server = CameraServer.getInstance();
     camera = server.startAutomaticCapture();
     if (camera != null) {
@@ -185,7 +200,7 @@ public class Robot extends TimedRobot {
       _robot.stopMotor();
       wentForward = true;
     } else if (!wentForward) {
-      _robot.tankDrive(0.4, 0.4);
+      _robot.tankDrive(-0.7, -0.7);
     }
   }
 
@@ -207,6 +222,8 @@ public class Robot extends TimedRobot {
     boolean rneg = right < 0;
     left *= left * (lneg ? -1 : 1);
     right *= right * (rneg ? -1 : 1);
+    left *= THROTTLE_MULTIPLIER;
+    right *= THROTTLE_MULTIPLIER;
     if (!lookingForTarget) {
       _robot.tankDrive(left, right, false);
     }
@@ -218,11 +235,13 @@ public class Robot extends TimedRobot {
       stopperSol.set(Value.kReverse);
     }
     if (driver1.getAButton()) {
-      intakeSol.set(Value.kForward);
+      //intakeSol.set(Value.kForward);
       intakeMotor.set(INTAKE_SPEED);
+      conveyorFront.set(INTAKE_SPEED);
     } else {
-      intakeSol.set(Value.kReverse);
+      //intakeSol.set(Value.kReverse);
       intakeMotor.stopMotor();
+      conveyorFront.stopMotor();
     }
     if (driver1.getYButton()) {
       shooterMotorL.set(SHOOTER_SPEED);
@@ -237,7 +256,7 @@ public class Robot extends TimedRobot {
       conveyorMotor.stopMotor();
     }
 
-    //auto aim
+    //auto aim (DO NOT CHANGE UNLESS ITS COMMENTING OR RENAMING!)
     if (driver1.getPOV() > -1) {
       switch (driver1.getPOV()) {
         case 90:
