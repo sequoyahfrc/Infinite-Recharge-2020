@@ -20,6 +20,7 @@ import edu.wpi.first.vision.VisionThread;
 //CTRE imports
 
 import com.ctre.phoenix.motorcontrol.can.*;
+import com.fasterxml.jackson.databind.deser.std.NumberDeserializers.IntegerDeserializer;
 
 //OpenCV/CSCore imports
 
@@ -39,11 +40,12 @@ public class Robot extends TimedRobot {
   private final double INTAKE_AIR_PULSE_TIME = 0.3;
   private final double INTAKE_SPEED = 0.75;
   private final double SHOOTER_SPEED = 1.0;
-  private final double CONVEYOR_SPEED = -0.4;
+  private final double CONVEYOR_SPEED = -0.6;
   private final double CONVEYFRONT_SPEED = 0.75;
   private final int[] CAMERA_RES = new int[] { 640, 480 };
   private final double AUTOAIM_TURN_SPEED = 0.1;
   private final double THROTTLE_MULTIPLIER = 0.75;
+  private int REVERSE = 1;
 
   // robot
   private DifferentialDrive _robot;
@@ -69,7 +71,7 @@ public class Robot extends TimedRobot {
 
   // pneumatics
   private Compressor _compressor;
-  private DoubleSolenoid intakeSol; // Value.kForward is extend Value.kReverse is retract
+  private DoubleSolenoid intakeSol;
   private DoubleSolenoid stopperSol;
 
   // controls
@@ -227,19 +229,21 @@ public class Robot extends TimedRobot {
     if (!lookingForTarget) {
       _robot.tankDrive(left, right, false);
     }
-
     // controls
+    /*if (driver1.getBumperPressed(Hand.kLeft) {
+      REVERSE *= -1;
+    }*/
     if (driver1.getBButton()) {
       stopperSol.set(Value.kForward);
     } else {
       stopperSol.set(Value.kReverse);
     }
     if (driver1.getAButton()) {
-      //intakeSol.set(Value.kForward);
-      intakeMotor.set(INTAKE_SPEED);
-      conveyorFront.set(INTAKE_SPEED);
+      intakeSol.set(Value.kForward);
+      intakeMotor.set(INTAKE_SPEED/* * REVERSE*/);
+      conveyorFront.set(INTAKE_SPEED/*  * REVERSE*/);
     } else {
-      //intakeSol.set(Value.kReverse);
+      intakeSol.set(Value.kReverse);
       intakeMotor.stopMotor();
       conveyorFront.stopMotor();
     }
@@ -251,7 +255,7 @@ public class Robot extends TimedRobot {
       shooterMotorR.stopMotor();
     }
     if (driver1.getXButton()) {
-      conveyorMotor.set(CONVEYOR_SPEED);
+      conveyorMotor.set(CONVEYOR_SPEED /* * REVERSE*/);
     } else {
       conveyorMotor.stopMotor();
     }
