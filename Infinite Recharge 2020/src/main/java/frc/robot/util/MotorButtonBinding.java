@@ -1,8 +1,8 @@
-package frc.robot;
+package frc.robot.util;
 
 import edu.wpi.first.wpilibj.SpeedController;
 
-class MotorButtonBinding {
+public class MotorButtonBinding {
 
     // should ONLY be set in the constructor, and not modified in ANY WAY
     // "[]" means array, or list, so motors is a array (list) of SpeedControllers

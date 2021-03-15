@@ -28,6 +28,8 @@ import org.opencv.core.*;
 
 //Other imports
 
+import frc.robot.util.*;
+
 @SuppressWarnings("unused") // prevent annoying warnings
 public class Robot extends TimedRobot {
 
@@ -83,17 +85,13 @@ public class Robot extends TimedRobot {
   //timers
   private Timer goForwardTimer = new Timer();
 
-  //vision stuff
-  private UsbCamera camera;
-  private CameraServer server;
-  private boolean lookingForTarget = false;
-  private int targetDir = 0;
-  private GRIPVisionProcessor processor;
-  private CvSource dashboard;
-  private double blobX;
-
   //other
   private boolean wentForward = false;
+
+  static {
+    
+  }
+
 
   @Override
   public void robotInit() {
@@ -129,54 +127,6 @@ public class Robot extends TimedRobot {
     xButton = new MotorButtonBinding(CONVEYOR_SPEED, conveyorMotor);
     yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
     aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
-
-    //vision
-
-    server = CameraServer.getInstance();
-    camera = server.startAutomaticCapture();
-    if (camera != null) {
-      camera.setBrightness(50);
-      try {
-        camera.setExposureManual(40);
-        camera.setExposureHoldCurrent();
-      }
-      catch (Exception e) {
-        System.err.println("Error setting exposure!");
-      }
-      camera.setResolution(CAMERA_RES[0], CAMERA_RES[1]);
-      processor = new GRIPVisionProcessor();
-      dashboard = server.putVideo("GRIP", 640, 480);
-    } else {
-      System.err.println("Could not find camera!");
-    }
-  }
-
-  public Mat getFrame() {
-    Mat m = new Mat();
-    int tries = 0;
-    //get frame
-    do {/* run grabFrame() at least once*/ tries++; } while (server.getVideo().grabFrame(m) == 0 && tries < 3);
-    return m;
-  }
-
-  public double getBlobX() {
-    KeyPoint[] blobs = processor.findBlobsOutput().toArray();
-    if (blobs.length > 0) {
-      return blobs[0].pt.x;
-    } else {
-      return -1;
-    }
-  }
-
-  public boolean isWithinMargin(double v, double target, double range) {
-    return (v >= target - range) && (v <= target + range);
-  }
-
-  public void runGRIPPipeLine() {
-    if (camera != null) {
-      processor.process(getFrame());
-      dashboard.putFrame(processor.mask1Output());
-    }
   }
 
   @Override
@@ -226,13 +176,11 @@ public class Robot extends TimedRobot {
     right *= right * (rneg ? -1 : 1);
     left *= THROTTLE_MULTIPLIER;
     right *= THROTTLE_MULTIPLIER;
-    if (!lookingForTarget) {
-      _robot.tankDrive(left, right, false);
-    }
+    _robot.tankDrive(left, right, false);
     // controls
-    /*if (driver1.getBumperPressed(Hand.kLeft) {
+    if (driver1.getBumperPressed(Hand.kLeft)) {
       REVERSE *= -1;
-    }*/
+    }
     if (driver1.getBButton()) {
       stopperSol.set(Value.kForward);
     } else {
@@ -240,8 +188,8 @@ public class Robot extends TimedRobot {
     }
     if (driver1.getAButton()) {
       intakeSol.set(Value.kForward);
-      intakeMotor.set(INTAKE_SPEED/* * REVERSE*/);
-      conveyorFront.set(INTAKE_SPEED/*  * REVERSE*/);
+      intakeMotor.set(INTAKE_SPEED * REVERSE);
+      conveyorFront.set(INTAKE_SPEED * REVERSE);
     } else {
       intakeSol.set(Value.kReverse);
       intakeMotor.stopMotor();
@@ -255,48 +203,9 @@ public class Robot extends TimedRobot {
       shooterMotorR.stopMotor();
     }
     if (driver1.getXButton()) {
-      conveyorMotor.set(CONVEYOR_SPEED /* * REVERSE*/);
+      conveyorMotor.set(CONVEYOR_SPEED);
     } else {
       conveyorMotor.stopMotor();
-    }
-
-    //auto aim (DO NOT CHANGE UNLESS ITS COMMENTING OR RENAMING!)
-    if (driver1.getPOV() > -1) {
-      switch (driver1.getPOV()) {
-        case 90:
-          // right
-          targetDir = 1;
-          lookingForTarget = true;
-          break;
-        case 270:
-          // left
-          targetDir = -1;
-          lookingForTarget = true;
-          break;
-        case 0:
-        case 180:
-          lookingForTarget = false;
-          targetDir = 0;
-          break;
-      }
-    }
-    if (lookingForTarget) {
-      //if target is in front of robot, stop looking for a target
-      boolean inCenter = isWithinMargin(blobX, CAMERA_RES[0] / 2, 25);
-      if (blobX > -1) {
-        if (inCenter) {
-          System.out.println("Target is at: " + blobX);
-          _robot.stopMotor();
-          lookingForTarget = false;
-          targetDir = 0;
-        }
-      }
-      if (!inCenter) {
-        _robot.arcadeDrive(0, targetDir * AUTOAIM_TURN_SPEED, false);
-      }
-      blobX = getBlobX();
-      System.out.println("Blob at: " + blobX);
-      runGRIPPipeLine();
     }
   }
 }
