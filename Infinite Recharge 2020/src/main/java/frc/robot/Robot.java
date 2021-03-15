@@ -29,6 +29,8 @@ import org.opencv.core.*;
 //Other imports
 
 import frc.robot.util.*;
+import frc.robot.handlers.*;
+import java.util.*;
 
 @SuppressWarnings("unused") // prevent annoying warnings
 public class Robot extends TimedRobot {
@@ -76,21 +78,7 @@ public class Robot extends TimedRobot {
   private DoubleSolenoid intakeSol;
   private DoubleSolenoid stopperSol;
 
-  // controls
-  private MotorButtonBinding xButton;
-  private MotorButtonBinding yButton;
-  private MotorButtonBinding aButton;
-  private MotorButtonBinding bButton;
-
-  //timers
-  private Timer goForwardTimer = new Timer();
-
-  //other
-  private boolean wentForward = false;
-
-  static {
-    
-  }
+  private final ArrayList<IRobotEventHandler> EVENT_HANDLERS = new ArrayList<>();
 
 
   @Override
@@ -123,60 +111,39 @@ public class Robot extends TimedRobot {
     driver2 = new XboxController(1);
     // invert shooter left because it goe s counter clockwise
     shooterMotorR.setInverted(true);
-    // motor button bindings (not used currently)
-    xButton = new MotorButtonBinding(CONVEYOR_SPEED, conveyorMotor);
-    yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
-    aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
+
+    // Event Handlers
+    EVENT_HANDLERS.add(new GoForward(_robot));
+    EVENT_HANDLERS.add(new TankDriveHandler(_robot, driver2));
+
+    EVENT_HANDLERS.forEach(IRobotEventHandler::robotInit);
   }
 
   @Override
   public void disabledInit() {
-    goForwardTimer.stop();
-    goForwardTimer.reset();
+    EVENT_HANDLERS.forEach(IRobotEventHandler::disabledInit);
   }
 
   @Override
   public void autonomousInit() {
-    if (goForwardTimer.get() != 0) {
-      goForwardTimer.stop();
-      goForwardTimer.reset();
-    }
-    if (!wentForward) {
-      goForwardTimer.start();
-    }
+    EVENT_HANDLERS.forEach(IRobotEventHandler::autonomousInit);
   }
 
   @Override
   public void autonomousPeriodic() {
-    if (goForwardTimer.hasPeriodPassed(1)) {
-      _robot.stopMotor();
-      wentForward = true;
-    } else if (!wentForward) {
-      _robot.tankDrive(-0.7, -0.7);
-    }
+    EVENT_HANDLERS.forEach(IRobotEventHandler::autonomousPeriodic);
   }
 
   // only executes once when teleop starts
   @Override
   public void teleopInit() {
-    // start compressor
-    _compressor.start();
+    EVENT_HANDLERS.forEach(IRobotEventHandler::teleopInit);
   }
 
   // loops over itself (every ~.02 seconds) until disabled
   @Override
   public void teleopPeriodic() {
-    //drive
-    double left = driver2.getY(Hand.kLeft);
-    double right = driver2.getY(Hand.kRight);
-    //square inputs so they arent touchy
-    boolean lneg = left < 0;
-    boolean rneg = right < 0;
-    left *= left * (lneg ? -1 : 1);
-    right *= right * (rneg ? -1 : 1);
-    left *= THROTTLE_MULTIPLIER;
-    right *= THROTTLE_MULTIPLIER;
-    _robot.tankDrive(left, right, false);
+    EVENT_HANDLERS.forEach(IRobotEventHandler::teleopPeriodic);
     // controls
     if (driver1.getBumperPressed(Hand.kLeft)) {
       REVERSE *= -1;
