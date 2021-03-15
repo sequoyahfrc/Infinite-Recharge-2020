@@ -83,6 +83,7 @@ public class Robot extends TimedRobot {
     shooterMotorR.setInverted(true);
 
     // Event Handlers
+    EVENT_HANDLERS.add(new CompressorHandler(compressor));
     EVENT_HANDLERS.add(new GoForward(robot));
     EVENT_HANDLERS.add(new TankDriveHandler(robot, driver2));
 
