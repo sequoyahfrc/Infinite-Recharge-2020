@@ -15,7 +15,7 @@ import java.util.*;
 
 public class Robot extends TimedRobot {
 
-  //--------------------CONSTANTS--------------------
+  // --------------------CONSTANTS--------------------
   private final double INTAKE_SPEED = 0.75;
   private final double SHOOTER_SPEED = 1.0;
   private final double CONVEYOR_SPEED = -0.6;
@@ -40,16 +40,16 @@ public class Robot extends TimedRobot {
   private SpeedControllerGroup mGroupRight;
 
   // controllers
-  private XboxController driver1;
-  private XboxController driver2;
+  private XboxController driver1; // Utilities (Shooting, aiming, etc.)
+  private XboxController driver2; // Tank Drive
 
   // pneumatics
   private Compressor compressor;
   private DoubleSolenoid intakeSol;
   private DoubleSolenoid stopperSol;
 
+  // Handlers
   private final ArrayList<IRobotEventHandler> EVENT_HANDLERS = new ArrayList<>();
-
 
   @Override
   public void robotInit() {
@@ -86,6 +86,7 @@ public class Robot extends TimedRobot {
     EVENT_HANDLERS.add(new CompressorHandler(compressor));
     EVENT_HANDLERS.add(new GoForward(robot));
     EVENT_HANDLERS.add(new TankDriveHandler(robot, driver2));
+    EVENT_HANDLERS.add(new LimeLightHandler(robot, driver1));
 
     EVENT_HANDLERS.forEach(IRobotEventHandler::robotInit);
   }

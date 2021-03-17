@@ -11,7 +11,7 @@ public abstract class RequiresTankDrive {
 
   }
 
-  protected DifferentialDrive getRobot() {
+  protected final DifferentialDrive getRobot() {
     return robot;
   }
   
