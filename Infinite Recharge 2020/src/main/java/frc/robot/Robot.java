@@ -29,11 +29,11 @@ public class Robot extends TimedRobot {
   private WPI_VictorSPX slaveLeft;
   private WPI_VictorSPX masterRight;
   private WPI_VictorSPX slaveRight;
-  private WPI_TalonSRX intakeMotor;
-  private WPI_TalonSRX conveyorMotor;
-  private WPI_TalonSRX shooterMotorL;
-  private WPI_TalonSRX shooterMotorR;
-  private WPI_VictorSPX conveyorFront;
+  private WPI_TalonSRX intakeMotor; // TODO: determine if used
+  private WPI_TalonSRX conveyorMotor; // TODO: determine if used
+  private WPI_TalonSRX shooterMotorL; // TODO: determine if used
+  private WPI_TalonSRX shooterMotorR; // TODO: determine if used
+  private WPI_VictorSPX conveyorFront; // TODO: determine if used
 
   // speed controller groups
   private SpeedControllerGroup mGroupLeft;
@@ -44,9 +44,9 @@ public class Robot extends TimedRobot {
   private XboxController driver2; // Tank Drive
 
   // pneumatics
-  private Compressor compressor;
-  private DoubleSolenoid intakeSol;
-  private DoubleSolenoid stopperSol;
+  private Compressor compressor; // TODO: determine if used
+  private DoubleSolenoid intakeSol; // TODO: determine if used 
+  private DoubleSolenoid stopperSol; // TODO: determine if used
 
   // Handlers
   private final ArrayList<IRobotEventHandler> EVENT_HANDLERS = new ArrayList<>();
@@ -65,15 +65,15 @@ public class Robot extends TimedRobot {
     mGroupLeft = new SpeedControllerGroup(masterLeft, slaveLeft);
     mGroupRight = new SpeedControllerGroup(masterRight, slaveRight);
     // talons
-    intakeMotor = new WPI_TalonSRX(4);
-    conveyorMotor = new WPI_TalonSRX(5);
-    shooterMotorL = new WPI_TalonSRX(6); // shooter motor left
-    shooterMotorR = new WPI_TalonSRX(7); // shooter motor right
-    conveyorFront = new WPI_VictorSPX(8);
+    intakeMotor = new WPI_TalonSRX(4); // TODO: determine if used
+    conveyorMotor = new WPI_TalonSRX(5); // TODO: determine if used
+    shooterMotorL = new WPI_TalonSRX(6); // shooter motor left // TODO: determine if used
+    shooterMotorR = new WPI_TalonSRX(7); // shooter motor right // TODO: determine if used
+    conveyorFront = new WPI_VictorSPX(8); // TODO: determine if used
     // pneumatics
-    compressor = new Compressor();
-    intakeSol = new DoubleSolenoid(60, 0, 1);
-    stopperSol = new DoubleSolenoid(60, 2, 3);
+    compressor = new Compressor(); // TODO: determine if used
+    intakeSol = new DoubleSolenoid(60, 0, 1); // TODO: determine if used
+    stopperSol = new DoubleSolenoid(60, 2, 3); // TODO: determine if used
     // robot
     robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     // controllers
@@ -116,7 +116,7 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     EVENT_HANDLERS.forEach(IRobotEventHandler::teleopPeriodic);
-    // controls
+    // TODO: Determine if this is used
     if (driver1.getBumperPressed(Hand.kLeft)) {
       REVERSE *= -1;
     }
