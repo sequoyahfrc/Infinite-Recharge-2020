@@ -4,6 +4,7 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.util.RequiresTankDrive;
 
 public class LimeLightHandler extends RequiresTankDrive implements IRobotEventHandler {
@@ -28,14 +29,20 @@ public class LimeLightHandler extends RequiresTankDrive implements IRobotEventHa
   }
 
   @Override
+  public void autonomousPeriodic() {
+    teleopPeriodic();
+  }
+
+  @Override
   public void teleopPeriodic() {
     if (table == null) {
       robotInit(); // Intilization failed, try again
       return;
     }
     double tx = table.getEntry("tx").getDouble(0);
-    final double Kp = 0.1;
+    SmartDashboard.putNumber("LimeLight TX", tx);
     if (driver1.getAButton()) {
+      final double Kp = 0.1;
       getRobot().tankDrive(tx * Kp, tx * Kp * -1);
     }
   }
