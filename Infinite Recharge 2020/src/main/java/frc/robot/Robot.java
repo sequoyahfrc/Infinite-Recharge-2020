@@ -1,56 +1,28 @@
 package frc.robot;
 
-
-
-//--------------------IMPORTS--------------------
-
-
-
 //WPILIB imports
-
 import edu.wpi.first.wpilibj.*;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj.GenericHID.Hand;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
-import edu.wpi.cscore.*;
-import edu.wpi.first.cameraserver.CameraServer;
-import edu.wpi.first.vision.VisionPipeline;
-import edu.wpi.first.vision.VisionThread;
 
 //CTRE imports
-
 import com.ctre.phoenix.motorcontrol.can.*;
-import com.fasterxml.jackson.databind.deser.std.NumberDeserializers.IntegerDeserializer;
-
-//OpenCV/CSCore imports
-
-import org.opencv.core.*;
 
 //Other imports
+import frc.robot.handlers.*;
+import java.util.*;
 
-import frc.robot.util.*;
-
-@SuppressWarnings("unused") // prevent annoying warnings
 public class Robot extends TimedRobot {
 
-
-
-  //--------------------CONSTANTS--------------------
-
-
-
-  private final double INTAKE_AIR_PULSE_TIME = 0.3;
+  // --------------------CONSTANTS--------------------
   private final double INTAKE_SPEED = 0.75;
   private final double SHOOTER_SPEED = 1.0;
   private final double CONVEYOR_SPEED = -0.6;
-  private final double CONVEYFRONT_SPEED = 0.75;
-  private final int[] CAMERA_RES = new int[] { 640, 480 };
-  private final double AUTOAIM_TURN_SPEED = 0.1;
-  private final double THROTTLE_MULTIPLIER = 0.75;
   private int REVERSE = 1;
 
   // robot
-  private DifferentialDrive _robot;
+  private DifferentialDrive robot;
 
   // motor controllers
   private WPI_VictorSPX masterLeft;
@@ -68,30 +40,16 @@ public class Robot extends TimedRobot {
   private SpeedControllerGroup mGroupRight;
 
   // controllers
-  private XboxController driver1;
-  private XboxController driver2;
+  private XboxController driver1; // Utilities (Shooting, aiming, etc.)
+  private XboxController driver2; // Tank Drive
 
   // pneumatics
-  private Compressor _compressor;
+  private Compressor compressor;
   private DoubleSolenoid intakeSol;
   private DoubleSolenoid stopperSol;
 
-  // controls
-  private MotorButtonBinding xButton;
-  private MotorButtonBinding yButton;
-  private MotorButtonBinding aButton;
-  private MotorButtonBinding bButton;
-
-  //timers
-  private Timer goForwardTimer = new Timer();
-
-  //other
-  private boolean wentForward = false;
-
-  static {
-    
-  }
-
+  // Handlers
+  private final ArrayList<IRobotEventHandler> EVENT_HANDLERS = new ArrayList<>();
 
   @Override
   public void robotInit() {
@@ -113,70 +71,51 @@ public class Robot extends TimedRobot {
     shooterMotorR = new WPI_TalonSRX(7); // shooter motor right
     conveyorFront = new WPI_VictorSPX(8);
     // pneumatics
-    _compressor = new Compressor();
+    compressor = new Compressor();
     intakeSol = new DoubleSolenoid(60, 0, 1);
     stopperSol = new DoubleSolenoid(60, 2, 3);
     // robot
-    _robot = new DifferentialDrive(mGroupLeft, mGroupRight);
+    robot = new DifferentialDrive(mGroupLeft, mGroupRight);
     // controllers
     driver1 = new XboxController(0);
     driver2 = new XboxController(1);
     // invert shooter left because it goe s counter clockwise
     shooterMotorR.setInverted(true);
-    // motor button bindings (not used currently)
-    xButton = new MotorButtonBinding(CONVEYOR_SPEED, conveyorMotor);
-    yButton = new MotorButtonBinding(SHOOTER_SPEED, shooterMotorL, shooterMotorR);
-    aButton = new MotorButtonBinding(INTAKE_SPEED, intakeMotor);
+
+    // Event Handlers
+    EVENT_HANDLERS.add(new CompressorHandler(compressor));
+    EVENT_HANDLERS.add(new GoForward(robot));
+    EVENT_HANDLERS.add(new TankDriveHandler(robot, driver2));
+    EVENT_HANDLERS.add(new LimeLightHandler(robot, driver1));
+
+    EVENT_HANDLERS.forEach(IRobotEventHandler::robotInit);
   }
 
   @Override
   public void disabledInit() {
-    goForwardTimer.stop();
-    goForwardTimer.reset();
+    EVENT_HANDLERS.forEach(IRobotEventHandler::disabledInit);
   }
 
   @Override
   public void autonomousInit() {
-    if (goForwardTimer.get() != 0) {
-      goForwardTimer.stop();
-      goForwardTimer.reset();
-    }
-    if (!wentForward) {
-      goForwardTimer.start();
-    }
+    EVENT_HANDLERS.forEach(IRobotEventHandler::autonomousInit);
   }
 
   @Override
   public void autonomousPeriodic() {
-    if (goForwardTimer.hasPeriodPassed(1)) {
-      _robot.stopMotor();
-      wentForward = true;
-    } else if (!wentForward) {
-      _robot.tankDrive(-0.7, -0.7);
-    }
+    EVENT_HANDLERS.forEach(IRobotEventHandler::autonomousPeriodic);
   }
 
   // only executes once when teleop starts
   @Override
   public void teleopInit() {
-    // start compressor
-    _compressor.start();
+    EVENT_HANDLERS.forEach(IRobotEventHandler::teleopInit);
   }
 
   // loops over itself (every ~.02 seconds) until disabled
   @Override
   public void teleopPeriodic() {
-    //drive
-    double left = driver2.getY(Hand.kLeft);
-    double right = driver2.getY(Hand.kRight);
-    //square inputs so they arent touchy
-    boolean lneg = left < 0;
-    boolean rneg = right < 0;
-    left *= left * (lneg ? -1 : 1);
-    right *= right * (rneg ? -1 : 1);
-    left *= THROTTLE_MULTIPLIER;
-    right *= THROTTLE_MULTIPLIER;
-    _robot.tankDrive(left, right, false);
+    EVENT_HANDLERS.forEach(IRobotEventHandler::teleopPeriodic);
     // controls
     if (driver1.getBumperPressed(Hand.kLeft)) {
       REVERSE *= -1;
