@@ -29,21 +29,16 @@ public class LimeLightHandler extends RequiresTankDrive implements IRobotEventHa
   }
 
   @Override
-  public void autonomousPeriodic() {
-    teleopPeriodic();
-  }
-
-  @Override
   public void teleopPeriodic() {
     if (table == null) {
       robotInit(); // Intilization failed, try again
       return;
     }
     double tx = table.getEntry("tx").getDouble(0);
-    SmartDashboard.putNumber("LimeLight TX", tx);
+    SmartDashboard.putString("DB/String 0", "LimeLight TX: " + tx); // debug
     if (driver1.getAButton()) {
       final double Kp = 0.1;
-      getRobot().tankDrive(tx * Kp, tx * Kp * -1);
+      getRobot().tankDrive(tx * Kp, -tx * Kp);
     }
   }
 
