@@ -17,9 +17,7 @@ public class ShooterHandler implements IRobotEventHandler {
   @Override
   public void teleopPeriodic() {
     double trigger = driver1.getTriggerAxis(Hand.kRight);
-    if (trigger > 0) {
-      shooterMotor.set(trigger);
-    }
+    shooterMotor.set(trigger);
   }
   
 }
