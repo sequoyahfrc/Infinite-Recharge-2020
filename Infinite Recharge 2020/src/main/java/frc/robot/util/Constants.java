@@ -7,9 +7,6 @@
 
 package frc.robot.util;
 
-/**
- * Add your docs here.
- */
 public class Constants {
   public static double conveyorSpeed = -0.2;
   public static double shooterSpeed = 0.75;
