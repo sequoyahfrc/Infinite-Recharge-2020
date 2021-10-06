@@ -5,10 +5,20 @@
 /* the project.                                                               */
 /*----------------------------------------------------------------------------*/
 
-package frc.robot.util;
+package frc.robot.subsystems;
 
-public class Constants {
-  public static double conveyorSpeed = -0.2;
-  public static double shooterSpeed = 0.75;
-  public static double limeLightSpeed = 0.1;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
+public class ExampleSubsystem extends SubsystemBase {
+  /**
+   * Creates a new ExampleSubsystem.
+   */
+  public ExampleSubsystem() {
+
+  }
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+  }
 }
