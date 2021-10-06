@@ -34,7 +34,7 @@ public class RobotContainer {
     setDefaultCommands();
   }
 
-  
+
   // Set default commands HERE
   private void setDefaultCommands() {
     CommandScheduler.getInstance().setDefaultCommand(driveSubsystem, joystickDrive);
