@@ -1,12 +1,14 @@
-package frc.robot.handlers;
+package frc.robot.handlers.old;
 
 import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
 
 import edu.wpi.first.wpilibj.XboxController;
+import frc.robot.handlers.IRobotEventHandler;
 
 public class IntakeHandler implements IRobotEventHandler {
 
-	private final WPI_TalonSRX intakeMotor;
+  private final
+   WPI_TalonSRX intakeMotor;
   private final XboxController driver1;
 
   public IntakeHandler(WPI_TalonSRX intakeMotor, XboxController driver1) {

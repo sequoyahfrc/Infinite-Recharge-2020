@@ -1,7 +1,8 @@
-package frc.robot.handlers;
+package frc.robot.handlers.autonomous;
 
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import frc.robot.handlers.IRobotEventHandler;
 import frc.robot.util.RequiresTankDrive;
 
 public class GoForward extends RequiresTankDrive implements IRobotEventHandler {

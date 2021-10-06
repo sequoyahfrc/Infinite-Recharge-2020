@@ -69,13 +69,13 @@ public class Robot extends TimedRobot {
     driver2 = new XboxController(1);
 
     // Event Handlers
-    EVENT_HANDLERS.add(new CompressorHandler(compressor));
-    EVENT_HANDLERS.add(new GoForward(robot));
+    //EVENT_HANDLERS.add(new CompressorHandler(compressor));
+    //EVENT_HANDLERS.add(new GoForward(robot));
     EVENT_HANDLERS.add(new TankDriveHandler(robot, driver2));
-    EVENT_HANDLERS.add(new LimeLightHandler(robot, driver1));        // A button
-    EVENT_HANDLERS.add(new ShooterHandler(driver1, shooterMotor));   // Right trigger
-    EVENT_HANDLERS.add(new ConveyorHandler(conveyorMotor, driver1)); // Y button
-    EVENT_HANDLERS.add(new IntakeHandler(intakeMotor, driver1));     // B button
+    //EVENT_HANDLERS.add(new LimeLightHandler(robot, driver1));        // A button
+    //EVENT_HANDLERS.add(new ShooterHandler(driver1, shooterMotor));   // Right trigger
+    //EVENT_HANDLERS.add(new ConveyorHandler(conveyorMotor, driver1)); // Y button
+    //EVENT_HANDLERS.add(new IntakeHandler(intakeMotor, driver1));     // B button
 
     EVENT_HANDLERS.forEach(IRobotEventHandler::robotInit);
   }
