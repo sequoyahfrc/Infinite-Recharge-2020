@@ -8,6 +8,9 @@
 package frc.robot;
 
 import frc.robot.subsystems.*;
+
+import com.ctre.phoenix.motorcontrol.can.WPI_TalonSRX;
+
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.*;
 
@@ -17,6 +20,9 @@ public class RobotContainer {
   // Commands
   private final Command goForward;
   private final JoystickDriveCommand joystickDrive;
+
+  // TODO: Move to IntakeSubsystem
+  private final WPI_TalonSRX intake, towerL, towerR;
 
   public RobotContainer() {
     // Init subsystems
@@ -32,6 +38,13 @@ public class RobotContainer {
     // Other
     configureButtonBindings();
     setDefaultCommands();
+    //TODO: Move to IntakeSubsystem
+    intake = new WPI_TalonSRX(4);
+    intake.setInverted(true);
+    towerR = new WPI_TalonSRX(7);
+    towerR.setInverted(true);
+    towerL = new WPI_TalonSRX(5);
+    towerL.setInverted(false);
   }
 
 
@@ -39,11 +52,19 @@ public class RobotContainer {
   private void setDefaultCommands() {
     CommandScheduler.getInstance().setDefaultCommand(driveSubsystem, joystickDrive);
   }
-
   // Configure button bindings HERE
   private void configureButtonBindings() {
     final Controller driver1 = new Controller(controllerSubsystem.getDriver1());
     final Controller driver2 = new Controller(controllerSubsystem.getDriver2());
+    // TODO: Create IntakeSubsystem
+    driver2.getAButton().whenActive(new StartEndCommand(() -> intake.set(0.5), () -> intake.set(0)));
+    driver2.getBButton().whenActive(new StartEndCommand(() -> {
+      towerL.set(0.25);
+      towerR.set(0.5);
+    }, () -> {
+      towerL.set(0);
+      towerR.set(0);
+    }));
   }
 
   // Return the command to be run during the autonomous period
