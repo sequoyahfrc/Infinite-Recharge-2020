@@ -24,6 +24,9 @@ public class RobotContainer {
   // TODO: Move to IntakeSubsystem
   private final WPI_TalonSRX intake, towerL, towerR;
 
+  // TODO: Move to ShooterSubsystem
+  private final WPI_TalonSRX shooter;
+
   public RobotContainer() {
     // Init subsystems
     driveSubsystem = new DriveSubsystem();
@@ -45,6 +48,8 @@ public class RobotContainer {
     towerR.setInverted(true);
     towerL = new WPI_TalonSRX(5);
     towerL.setInverted(false);
+    // TODO: Move to ShooterSubsystem
+    shooter = new WPI_TalonSRX(6);
   }
 
 
@@ -56,15 +61,6 @@ public class RobotContainer {
   private void configureButtonBindings() {
     final Controller driver1 = new Controller(controllerSubsystem.getDriver1());
     final Controller driver2 = new Controller(controllerSubsystem.getDriver2());
-    // TODO: Create IntakeSubsystem
-    driver2.getAButton().whenActive(new StartEndCommand(() -> intake.set(0.5), () -> intake.set(0)));
-    driver2.getBButton().whenActive(new StartEndCommand(() -> {
-      towerL.set(0.25);
-      towerR.set(0.5);
-    }, () -> {
-      towerL.set(0);
-      towerR.set(0);
-    }));
   }
 
   // Return the command to be run during the autonomous period
