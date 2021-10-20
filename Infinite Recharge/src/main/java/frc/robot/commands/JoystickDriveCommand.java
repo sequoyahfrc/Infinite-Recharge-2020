@@ -21,6 +21,10 @@ public class JoystickDriveCommand extends CommandBase {
   public void execute() {
     double l = driver1.getY(Hand.kLeft);
     double r = driver1.getY(Hand.kRight);
+    l = l < 0 ? -(l * l) : l * l;
+    r = r < 0 ? -(r * r) : r * r;
+    l *= 0.8;
+    r *= 0.8;
     drive.tankDrive(l, r);    
   }
 }
