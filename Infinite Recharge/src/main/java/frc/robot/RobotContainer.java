@@ -64,7 +64,7 @@ public class RobotContainer {
   }
 
   // Return the command to be run during the autonomous period
-  public Command getAutonomousCommand() {
+  /*public Command getAutonomousCommand() {
     return goForward;
-  }
+  }*/
 }
