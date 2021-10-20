@@ -18,6 +18,7 @@ public class RobotContainer {
   private final DriveSubsystem driveSubsystem;
   private final ControllerSubsystem controllerSubsystem;
   // Commands
+  //private final Command goForward;
   private final JoystickDriveCommand joystickDrive;
 
   // TODO: Move to IntakeSubsystem
@@ -31,11 +32,11 @@ public class RobotContainer {
     driveSubsystem = new DriveSubsystem();
     controllerSubsystem = new ControllerSubsystem();
     // Init controllers
-    goForward = new SequentialCommandGroup(
+    /*goForward = new SequentialCommandGroup(
       new InstantCommand(() -> driveSubsystem.tankDrive(0.5, 0.5), driveSubsystem),
       Utils.withRequirements(new WaitCommand(1.5), driveSubsystem),
       new InstantCommand(() -> driveSubsystem.stop(), driveSubsystem)
-    );
+    );*/
     joystickDrive = new JoystickDriveCommand(driveSubsystem, controllerSubsystem);
     // Other
     configureButtonBindings();
