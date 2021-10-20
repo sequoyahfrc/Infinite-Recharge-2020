@@ -18,7 +18,6 @@ public class RobotContainer {
   private final DriveSubsystem driveSubsystem;
   private final ControllerSubsystem controllerSubsystem;
   // Commands
-  private final Command goForward;
   private final JoystickDriveCommand joystickDrive;
 
   // TODO: Move to IntakeSubsystem
