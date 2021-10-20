@@ -1,9 +1,8 @@
 package frc.robot.subsystems;
 
 import edu.wpi.first.wpilibj.XboxController;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class ControllerSubsystem extends SubsystemBase {
+public class ControllerSubsystem {
 
   private final XboxController driver1;
   private final XboxController driver2;

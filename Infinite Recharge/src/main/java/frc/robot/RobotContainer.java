@@ -17,20 +17,17 @@ import frc.robot.commands.*;
 public class RobotContainer {
   private final DriveSubsystem driveSubsystem;
   private final ControllerSubsystem controllerSubsystem;
+  private final ShooterSubsystem shooterSubsystem;
+
   // Commands
   private final Command goForward;
   private final JoystickDriveCommand joystickDrive;
-
-  // TODO: Move to IntakeSubsystem
-  private final WPI_TalonSRX intake, towerL, towerR;
-
-  // TODO: Move to ShooterSubsystem
-  private final WPI_TalonSRX shooter;
 
   public RobotContainer() {
     // Init subsystems
     driveSubsystem = new DriveSubsystem();
     controllerSubsystem = new ControllerSubsystem();
+    shooterSubsystem = new ShooterSubsystem();
     // Init controllers
     goForward = new SequentialCommandGroup(
       new InstantCommand(() -> driveSubsystem.tankDrive(0.5, 0.5), driveSubsystem),
@@ -41,15 +38,6 @@ public class RobotContainer {
     // Other
     configureButtonBindings();
     setDefaultCommands();
-    //TODO: Move to IntakeSubsystem
-    intake = new WPI_TalonSRX(4);
-    intake.setInverted(true);
-    towerR = new WPI_TalonSRX(7);
-    towerR.setInverted(true);
-    towerL = new WPI_TalonSRX(5);
-    towerL.setInverted(false);
-    // TODO: Move to ShooterSubsystem
-    shooter = new WPI_TalonSRX(6);
   }
 
 
