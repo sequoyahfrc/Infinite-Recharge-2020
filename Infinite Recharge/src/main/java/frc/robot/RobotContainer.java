@@ -8,7 +8,6 @@
 package frc.robot;
 
 import frc.robot.subsystems.*;
-
 import edu.wpi.first.wpilibj2.command.*;
 import frc.robot.commands.*;
 
@@ -16,6 +15,7 @@ public class RobotContainer {
   private final DriveSubsystem driveSubsystem;
   private final ControllerSubsystem controllerSubsystem;
   private final ShooterSubsystem shooterSubsystem;
+  private final IntakeSubsystem intakeSubsystem;
 
   // Commands
   //private final Command goForward;
@@ -26,6 +26,7 @@ public class RobotContainer {
     driveSubsystem = new DriveSubsystem();
     controllerSubsystem = new ControllerSubsystem();
     shooterSubsystem = new ShooterSubsystem();
+    intakeSubsystem = new IntakeSubsystem();
     /*goForward = new SequentialCommandGroup(
       new InstantCommand(() -> driveSubsystem.tankDrive(0.5, 0.5), driveSubsystem),
       Utils.withRequirements(new WaitCommand(1.5), driveSubsystem),
@@ -46,6 +47,17 @@ public class RobotContainer {
   private void configureButtonBindings() {
     final Controller driver1 = new Controller(controllerSubsystem.getDriver1());
     final Controller driver2 = new Controller(controllerSubsystem.getDriver2());
+
+    intakeSubsystem.getStopIntakeSwitch().whileActiveOnce(Utils.withRequirements(new SequentialCommandGroup(
+      new InstantCommand(() -> {
+        intakeSubsystem.stopIntake();
+        intakeSubsystem.setTower(0.5);
+      }),
+      new WaitCommand(0.5), //TODO: adjust me
+      new InstantCommand(() -> {
+        intakeSubsystem.stopTower();
+      })
+    ), intakeSubsystem));
   }
 
   // Return the command to be run during the autonomous period
