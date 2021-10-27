@@ -14,7 +14,7 @@ public class JoystickDriveCommand extends CommandBase {
   public JoystickDriveCommand(DriveSubsystem drive, ControllerSubsystem controllers) {
     this.drive = drive;
     driver1 = controllers.getDriver1();
-    addRequirements(drive, controllers);
+    addRequirements(drive);
   }
 
   @Override
