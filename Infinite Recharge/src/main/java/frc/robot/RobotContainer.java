@@ -28,7 +28,6 @@ public class RobotContainer {
     driveSubsystem = new DriveSubsystem();
     controllerSubsystem = new ControllerSubsystem();
     shooterSubsystem = new ShooterSubsystem();
-    // Init controllers
     /*goForward = new SequentialCommandGroup(
       new InstantCommand(() -> driveSubsystem.tankDrive(0.5, 0.5), driveSubsystem),
       Utils.withRequirements(new WaitCommand(1.5), driveSubsystem),
