@@ -17,7 +17,7 @@ public class IntakeSubsystem extends SubsystemBase {
     towerR = new WPI_TalonSRX(7);
     towerR.setInverted(true);
     towerL = new WPI_TalonSRX(5);
-    stopIntakeSwitch = new DigitalInput(0); //TODO: change ID
+    stopIntakeSwitch = new DigitalInput(0);
   }
 
   public void setSpeed(double value) {

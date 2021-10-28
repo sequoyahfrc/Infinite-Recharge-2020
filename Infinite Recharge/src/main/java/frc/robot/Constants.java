@@ -16,4 +16,5 @@ package frc.robot;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
+  public static final double TOWER_MOVE_TIME = 0.5;
 }

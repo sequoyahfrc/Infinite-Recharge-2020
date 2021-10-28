@@ -48,12 +48,21 @@ public class RobotContainer {
     final Controller driver1 = new Controller(controllerSubsystem.getDriver1());
     final Controller driver2 = new Controller(controllerSubsystem.getDriver2());
 
+    driver1.getBButton().whenActive(new StartEndCommand(
+      () -> {
+        intakeSubsystem.setSpeed(0.75);
+      },
+      () -> {
+        intakeSubsystem.stopIntake();
+      }
+    ).withInterrupt(() -> !controllerSubsystem.getDriver1().getBButtonPressed()));
+
     intakeSubsystem.getStopIntakeSwitch().whileActiveOnce(Utils.withRequirements(new SequentialCommandGroup(
       new InstantCommand(() -> {
         intakeSubsystem.stopIntake();
         intakeSubsystem.setTower(0.5);
       }),
-      new WaitCommand(0.5), //TODO: adjust me
+      new WaitCommand(Constants.TOWER_MOVE_TIME),
       new InstantCommand(() -> {
         intakeSubsystem.stopTower();
       })
