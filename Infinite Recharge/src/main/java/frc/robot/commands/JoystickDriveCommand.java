@@ -8,23 +8,23 @@ import frc.robot.subsystems.DriveSubsystem;
 
 public class JoystickDriveCommand extends CommandBase {
 
-  private final XboxController driver1;
+  private final XboxController driver2;
 	private final DriveSubsystem drive;
 
   public JoystickDriveCommand(DriveSubsystem drive, ControllerSubsystem controllers) {
     this.drive = drive;
-    driver1 = controllers.getDriver1();
+    driver2 = controllers.getDriver2();
     addRequirements(drive);
   }
 
   @Override
   public void execute() {
-    double l = driver1.getY(Hand.kLeft);
-    double r = driver1.getY(Hand.kRight);
+    double l = driver2.getY(Hand.kLeft);
+    double r = driver2.getY(Hand.kRight);
     l = l < 0 ? -(l * l) : l * l;
     r = r < 0 ? -(r * r) : r * r;
-    l *= 0.8;
-    r *= 0.8;
+    l *= 0.9;
+    r *= 0.9;
     drive.tankDrive(l, r);    
   }
 }

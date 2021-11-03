@@ -16,10 +16,9 @@ public class RobotContainer {
   private final ControllerSubsystem controllerSubsystem;
   private final ShooterSubsystem shooterSubsystem;
   private final IntakeSubsystem intakeSubsystem;
-  private final TowerSubsystem towerSubsystem;
 
   // Commands
-  private final AutoForward autoForward;
+  private final Command goForward;
   private final JoystickDriveCommand joystickDrive;
 
   public RobotContainer() {
@@ -28,8 +27,11 @@ public class RobotContainer {
     controllerSubsystem = new ControllerSubsystem();
     shooterSubsystem = new ShooterSubsystem();
     intakeSubsystem = new IntakeSubsystem();
-    towerSubsystem = new TowerSubsystem();
-    autoForward = new AutoForward(driveSubsystem);
+    // goForward = new SequentialCommandGroup(
+    //   new InstantCommand(() -> driveSubsystem.tankDrive(0.5, 0.5), driveSubsystem),
+    //   Utils.withRequirements(new WaitCommand(1.5), driveSubsystem),
+    //   new InstantCommand(() -> driveSubsystem.stop(), driveSubsystem)
+    // );
     joystickDrive = new JoystickDriveCommand(driveSubsystem, controllerSubsystem);
     // Other
     configureButtonBindings();
@@ -46,53 +48,29 @@ public class RobotContainer {
     final Controller driver1 = new Controller(controllerSubsystem.getDriver1());
     final Controller driver2 = new Controller(controllerSubsystem.getDriver2());
 
-    driver1.getBButton().whileHeld(new StartEndCommand(
+    driver1.getBButton().whenActive(new StartEndCommand(
       () -> {
-        intakeSubsystem.setSpeed(1.0);
+        intakeSubsystem.setSpeed(0.75);
       },
       () -> {
         intakeSubsystem.stopIntake();
       }
-    ));
+    ).withInterrupt(() -> !controllerSubsystem.getDriver1().getBButtonPressed()));
 
-    driver1.getLeftBumper().whileHeld(new StartEndCommand(
-      () -> {
-        // intakeSubsystem.setTower(0.50);
-        towerSubsystem.oneBall(.35);
-      },
-      () -> {
-        // intakeSubsystem.stopTower();
-        towerSubsystem.stopTower();
-      }
-    ));
-
-    driver1.getAButton().whileHeld(new StartEndCommand(
-      () -> {
-        // intakeSubsystem.setTower(0.50);
-        towerSubsystem.purge(.50);
-      },
-      () -> {
-        // intakeSubsystem.stopTower();
-        towerSubsystem.stopTower();
-      }
-    ));
-
-
-    driver1.getRightBumper().whileHeld(new StartEndCommand(
-      () -> {
-        shooterSubsystem.setSpeed(1.0);
-      },
-      () -> {
-        shooterSubsystem.stop();
-      }
-    ));
+    intakeSubsystem.getStopIntakeSwitch().whileActiveOnce(Utils.withRequirements(new SequentialCommandGroup(
+      new InstantCommand(() -> {  
+        intakeSubsystem.stopIntake();
+        intakeSubsystem.setTower(0.5);
+      }),
+      new WaitCommand(Constants.TOWER_MOVE_TIME),
+      new InstantCommand(() -> {
+        intakeSubsystem.stopTower();
+      })
+    ), intakeSubsystem));
   }
 
   // Return the command to be run during the autonomous period
   public Command getAutonomousCommand() {
-    return new SequentialCommandGroup(
-      new AutoShoot(towerSubsystem, shooterSubsystem),
-      new AutoForward(driveSubsystem).withTimeout(3.5)
-    );
+    //return goForward;
   }
 }
